@@ -1,284 +1,202 @@
-Version: "0.1"
-Environment:
-  Name: nmmo
-  Description: An RTS Game. There's aliens and stuff.
-  Observers:
-    Sprite2D:
-      TileSize: 16
-      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
-    Isometric:
-      TileSize: [32, 48]
-      BackgroundTile: oryx/oryx_iso_dungeon/floor-1.png
-      TileOffsetY: 16
-  Variables:
-    - Name: player_resources
-      InitialValue: 0
-  Player:
-    Count: 2
-  Termination:
-    Lose:
-      - eq: [base:count, 0] # If the player has no bases
-    Win:
-      - eq: [_score, 10] # First player to 10 reward points
-  Levels:
-    - |
-      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 
-      W  .  .  B1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  M  M  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  M  .  M  M  M  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  M  .  .  M  .  M  M  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B2 .  .  W 
-      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
-    - |
-      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W 
-      W  .  .  B1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  H1 .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  M  M  .  M  M  M  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  M  .  M  M  M  .  M  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-      W  W  W  W  W  W  W  W  W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-      W  .  .  .  .  .  .  W  W  .  .  .  w  w  w  w  w  w  .  .  .  .  .  W  W  W  W  W  w  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  w  w  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  W  W  W  W  w  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  W  W  W  W  W  w  W 
-      W  .  .  .  .  P1 w  .  .  .  .  .  .  .  .  M  M  M  M  M  M  .  W  W  W  W  W  W  W  W 
-      W  .  .  .  .  P1 w  .  .  .  .  .  .  .  M  .  .  M  .  M  M  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  P2 w  .  .  .  .  .  .  .  M  M  M  M  M  M  M  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  P2 w  .  .  .  .  .  .  .  .  .  M  M  M  M  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  P1 w  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  H2 .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W 
-      W  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  B2 .  .  W 
-      W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W  W
-
 Actions:
-  - Name: spawn_harvester
-    InputMapping:
-      Internal: true
-    Behaviours:
-      - Src:
-          Object: base
+- Behaviours:
+  - Dst:
+      Commands:
+      - decr: leaves
+      - eq:
+          Arguments:
+          - leaves
+          - 0
           Commands:
-            - spawn: harvester
-        Dst:
-          Object: _empty
-         
-
-      - Src:
-          Object: base
-        Dst:
-          Object: [base, puncher, harvester, pusher, movable_wall]
-          Commands:
-            - exec:
-                Action: spawn_harvester
-                Delay: 1
-                Randomize: true
-
-  # Harvester costs 5 resources to build
-  - Name: build_harvester
-    Behaviours:
-      - Src:
-          Preconditions:
-            - gt: [player_resources, 5]
-          Object: base
-        Dst:
-          Object: base
-          Commands:
-            - exec:
-                Action: spawn_harvester
-                Delay: 10
-                Randomize: true
-          
-                  
-  - Name: gather
-    Behaviours:
-      - Src:
-          Object: harvester
-          Commands:
-            - incr: resources
-            - reward: 1
-        Dst:
-          Object: minerals
-          Commands:
-            - decr: resources
-            - eq:
-                Arguments: [resources, 0]
-                Commands:
-                  - remove: true
-      - Src:
-          Object: harvester
-          Commands:
-            - decr: resources
-            - reward: 1
-        Dst:
-          Object: base
-          Commands:
-            - incr: player_resources
-
-  - Name: move
-    Behaviours:
-      - Src:
-          Object: [harvester, puncher, pusher, movable_wall]
-          Commands:
-            - mov: _dest # mov will move the object, _dest is the destination location of the action
-        Dst:
-          Object: _empty
-
-      - Src:
-          Object: pusher
-          Commands:
-            - mov: _dest # mov will move the object, _dest is the destination location of the action
-        Dst:
-          Object: [movable_wall, harvester, puncher]
-          Commands:
-            - cascade: _dest # reapply the same action to the dest location of the action
-
-  - Name: punch
-    Behaviours:
-      - Src:
-          Object: puncher
-          Commands:
-            - reward: 1
-        Dst:
-          Object: [puncher, harvester, pusher, base]
-          Commands:
-            - decr: health
-            - eq:
-                Arguments: [0, health]
-                Commands:
-                  - remove: true
-
+          - remove: true
+      Object: shrubs
+    Src:
+      Commands:
+      - incr: leaves
+      - reward: 1
+      Object: gnome
+  Name: gather
+- Behaviours:
+  - Dst:
+      Commands:
+      - set_tile: 1
+      Object: lava
+    Src:
+      Commands:
+      - reward: -1
+      - remove: true
+      - mov: _dest
+      - set_tile: 1
+      Object: gnome
+  - Dst:
+      Object: _empty
+    Src:
+      Commands:
+      - mov: _dest
+      Object: gnome
+  Name: move
+Environment:
+  Description: An NMMO-type game. The idea is to set up an open-ended system wherein
+    agents can progress from hunter gathering, to agriculture, to basic civilization.
+  Levels:
+  - "W W W W W W H7 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W\
+    \ W W W H19 W W W W W W W W \n W . R W . . . R . . S R . S S R . . W S . . S S\
+    \ S R S . . . W R . S . S W . S . . R . . S S S . S W \n W . . W . R S . . S S\
+    \ . S R S S . . R W W . . W . . S S S . . . . S W R . . S S R . . . W W S W S\
+    \ W \n W S . . . . R . . . . S S . R H16 . . R S R . S . . R . R . . . W . S R\
+    \ W . S W S R S . . . . W R . W \n W S W S . S R . S R H25 W S S S S S S W . S\
+    \ . . . . . S R . . S . R S S S . S . S W S . . S S . . R W \n W S . W S S R W\
+    \ W W R . . R S W S . . S S R S R S S S . . . . . . . . H33 . . S . . . R H50\
+    \ S . W . . W \n W . S . S . S . R S . . . S . . S R S S H31 . S S . H10 . . .\
+    \ S . . S W . S S S . W . S S S . S . . . W \n W . S . R R . . . . . . . . R .\
+    \ S W H14 R S H42 S . . . S . S S S . . . . R . W . . W . S W . . . . . W \n W\
+    \ . S . . . S R R . . . . . H29 . . S . R . S . S . . R . S . W R . S S . . .\
+    \ . W . S . R S . . . . W \n W S . R W . S . . W . S . R S W . S S . . S . S W\
+    \ R S . . S . S R W S S S R . . . . S R . . W . R W \n W W W S . . . . W W W S\
+    \ . . . . S S . . S . . R W S W W R R S . . . . S S S S . S . S R W S S S . W\
+    \ \n W . W . S . . W . . S R . S . S . . S . . . . W . S . . S S R R . . R S R\
+    \ R S . S . S W . . . R . W \n W . S R R S S S . S . S S R S R . S W S W . S .\
+    \ . W R . . S . W . S S W . . W . . S W S . R . S S W \n W . . . S S S . S W W\
+    \ . S W . . . . R H34 R . R . . S . S . R S S . S W . S R . S . W . . . S S .\
+    \ R W \n W . . . S . R . . . . . . . S . . W H47 S S S . . . . R S W R W . S .\
+    \ R . . . . . . W R S W . W R . W \n W W S . . H13 H5 S . . R W . . S . S . R\
+    \ . H37 S S R S . . . S . W . . S W . S S . . . . . S . . S S S W \n W S . S .\
+    \ . . H15 . S S . S W . . R S . S . . . S S . W S S S S S . . R . . S W . R .\
+    \ S . . S S . . W \n H6 S . W . S S . . . H46 . S . . . S . . . S . . S R . .\
+    \ . S S . W . R R . S . . . S S S S . . S S . W \n W . S W W . . S S S . . S .\
+    \ R S . . R W . S S . . . W S . . S . . S . R S S R S S . . W . . S . . W \n W\
+    \ R S R W . . S W S S W . . R W . . S . S . . . . W . W S . . S S . S S . . S\
+    \ . W . . . S . . . S W \n W R S H21 S R S . H32 S . . W S . . S S . . S R . .\
+    \ S R . . . S . H17 S S S S . . . . S S S . . . W S S W \n W . R . W . S H24 S\
+    \ . . W . R W S . W . W R S . . S S . . R S S R . S . . . W S S . S S S R S R\
+    \ H4 S W \n W . . . . . . W R . . . . W . . . S . S . . S S . . R . S . . S .\
+    \ . S R . . R . . S . . . . . S S W \n W . W . S R S S . R S . . R . . S R R .\
+    \ . . S . S S . S S R R . . . S . S . S . W S . . . . . . R W \n W . . W . W W\
+    \ . S R . . S . . . . . S S . . W S S . R . W S . S S . . S R S . S . S . S S\
+    \ . S S . W \n H27 . . W R . S . W S . W . S . . W S . . W . . . S S S S . S S\
+    \ H3 . S . . . S . R . S . . . W S . . W \n W . S S W S S . R . S S . . . S W\
+    \ . . . . R S S W . . . H12 . . . R . . . S W . S . H28 . S R S S . R W \n W R\
+    \ . . . . . R . . R . . R . S H23 . R W S W S S S S S S S W W . S S . . W S .\
+    \ . . . . . S . H18 S . W \n W H20 . . . . . . . S R . . S R W . . W . W R . S\
+    \ . S . R . S S . S H41 . . R S S S S S R W S . . . . W \n H38 . S . W S S S .\
+    \ . R . S R . . S . . . S S . . S . . S R R R . . R . . W S . . . . . . R S H26\
+    \ . . W \n W . . W . R . W . . R R S . S . . S . . R . . . . S . S . . S . W .\
+    \ H49 . . S . S . . . R . . W S S W \n W . . S S S . . . . W S W . . S . . S .\
+    \ . W . W . . . . . W W . . W S W S . . . S S S . S W . S R W \n W S . . S S .\
+    \ W R R . . W R S S . . . . S W H44 S R H2 S R S S R S S S S . . S . . S W . S\
+    \ S . S . . W \n W S . H9 . . . S W S S S . . . R H45 . S . . . W S S . S . R\
+    \ W . . . . S S S S . W W S . . S S . R . W \n W W S S . S W W . S W R W W . R\
+    \ S . . S W S . S . S R R S W S S R . S . S . . S . W . W S S . . W W \n W S R\
+    \ S R . . R . . . R S . R S . R . . . . S . S S . S S . S . S . R . S . . . .\
+    \ W . S S S S . . W \n W . . . . . . W . . R S W . S . . . S R R R . W . H30 S\
+    \ S . . S S S . . . . . S . S S . S . W . S . W \n W W . R . W . . . W R . . .\
+    \ R . . . R . W S . . W . R H1 . . . . R . . . S S S R H8 . . S W S . . . W \n\
+    \ W S R R W R W . S S S . R . . . . S . R S W S S W . . . . S . . S W S . . R\
+    \ . S . . R . W . . W S W \n W S H22 . . W . . R S R . . S . . R . W . S . S W\
+    \ S . . . . S . . . R . S S S . . S . . . S . S . . W \n W . . R . . W . R W R\
+    \ S . S W . S W S W R . . S S . W . S S . . R S R . S R . . . S . W . R W . .\
+    \ W \n W W . S . S . . . H40 . . S S . . . W S S . . . S S . S R . . R S . S .\
+    \ . S . . . S S . S W R S W S W \n W S . S W . . S S . W . W R . W . . . R . W\
+    \ . . . . . S . R S S R . S . H36 . W W W S R . . S S S . W \n W W . S . . . .\
+    \ . . S . R . . . R . W . W . S . R . . . . . S H43 R . S . S . . . . W . . W\
+    \ S S S . W \n W . . S . S S S H48 . S S W W W S S . S S S S R W . . . . S . S\
+    \ S S W S . . S . S . . S R . . R R . W \n W . S . . R . . R R W . S W . . . R\
+    \ R H39 S S . . S . S S . S . . R S . S W W S S S S . . . S . . . W \n W . . S\
+    \ . S . S . . . R . . . . S . S W W W . S S . S W . . . S W H11 . R . . . W W\
+    \ . R R S . . R W W \n W S . . . . . . . . S S . R . . W S . S . . . W S W . H35\
+    \ S . . W . R . . W . W S . . . . . . R S . W \n W S S . . . . R W S R . . . .\
+    \ S S . . S . W . . S . R . . . S . S S . . . S W . S S S . R . . S R W \n W W\
+    \ W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W\
+    \ W W W W W W W W W W \n"
+  Name: nmmo
+  Observers:
+    Isometric:
+      BackgroundTile: oryx/oryx_iso_dungeon/grass-1.png
+      TileOffsetY: 16
+      TileSize:
+      - 32
+      - 48
+    Sprite2D:
+      BackgroundTile: oryx/oryx_tiny_galaxy/tg_sliced/tg_world/tg_world_floor_panel_metal_a.png
+      TileSize: 16
+  Player:
+    AvatarObject: gnome
+    Count: 50
+    Observer:
+      Height: 7
+      OffsetX: 0
+      OffsetY: 0
+      RotateWithAvatar: true
+      TrackAvatar: true
+      Width: 7
+  Termination:
+    Lose: null
+    Win: null
+  Variables:
+  - InitialValue: 0
+    Name: player_resources
+  - InitialValue: 0
+    Name: player_dead
 Objects:
-  - Name: minerals
-    MapCharacter: M
-    Variables:
-      - Name: resources
-        InitialValue: 200
-    Observers:
-      Sprite2D:
-        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
-      Block2D:
-        - Shape: triangle
-          Color: [0.0, 1.0, 0.0]
-          Scale: 1.0
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/minerals-1.png
-
-  - Name: harvester
-    MapCharacter: H
-    Variables:
-      - Name: resources
-        InitialValue: 0
-      - Name: health
-        InitialValue: 10
-    Observers:
-      Sprite2D:
-        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
-      Block2D:
-        - Shape: square
-          Color: [0.6, 0.2, 0.2]
-          Scale: 0.5
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/jelly-1.png
-
-  - Name: pusher
-    MapCharacter: P
-    Variables:
-      - Name: health
-        InitialValue: 10
-    Observers:
-      Sprite2D:
-        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
-      Block2D:
-        - Shape: square
-          Color: [0.2, 0.2, 0.6]
-          Scale: 1.0
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/queen-1.png
-
-  - Name: puncher
-    MapCharacter: p
-    Variables:
-      - Name: health
-        InitialValue: 5
-    Observers:
-      Sprite2D:
-        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
-      Block2D:
-        - Color: [0.2, 0.6, 0.6]
-          Shape: square
-          Scale: 0.8
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/beast-1.png
-
-  - Name: fixed_wall
-    MapCharacter: W
-    Observers:
-      Sprite2D:
-        - TilingMode: WALL_2 # Will tile walls with two images
-          Image:
-            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
-            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
-      Block2D:
-        - Color: [0.5, 0.5, 0.5]
-          Shape: square
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
-
-  - Name: movable_wall
-    MapCharacter: w
-    Observers:
-      Sprite2D:
-        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png
-      Block2D:
-        - Color: [0.8, 0.8, 0.8]
-          Shape: square
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/crate-1.png
-
-  - Name: base
-    MapCharacter: B
-    Variables:
-      - Name: health
-        InitialValue: 10
-    Observers:
-      Sprite2D:
-        - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
-      Block2D:
-        - Color: [0.8, 0.8, 0.3]
-          Shape: triangle
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/base-1.png
+- MapCharacter: S
+  Name: shrubs
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/bush-1.png
+  Variables:
+  - InitialValue: 1
+    Name: leaves
+- MapCharacter: R
+  Name: rock
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
+      Offset:
+      - 0
+      - 15
+- MapCharacter: H
+  Name: gnome
+  Observers:
+    Block2D:
+    - Color:
+      - 0.6
+      - 0.2
+      - 0.2
+      Scale: 0.5
+      Shape: square
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
+    - Image: oryx/oryx_iso_dungeon/lava-1.png
+    Sprite2D:
+    - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
+  Variables:
+  - InitialValue: 0
+    Name: leaves
+  - InitialValue: 0
+    Name: resources
+  - InitialValue: 10
+    Name: health
+- MapCharacter: W
+  Name: lava
+  Observers:
+    Block2D:
+    - Color:
+      - 0.5
+      - 0.5
+      - 0.5
+      Shape: square
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/lava-1.png
+      Offset:
+      - 0
+      - 4
+    - Image: oryx/oryx_iso_dungeon/lava-1.png
+      Offset:
+      - 0
+      - 2
+    Sprite2D:
+    - Image:
+      - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
+      - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
+      TilingMode: WALL_2
+Version: '0.1'

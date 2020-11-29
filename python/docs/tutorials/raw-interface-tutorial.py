@@ -1,3 +1,4 @@
+from pdb import set_trace as T
 import numpy as np
 
 from griddly import GriddlyLoader, gd
@@ -21,7 +22,7 @@ if __name__ == '__main__':
     loader = GriddlyLoader()
 
     # Load the game description
-    grid = loader.load_game('RTS/basicRTS.yaml')
+    grid = loader.load_game('RTS/GriddlyRTS.yaml')
 
     # Load a custom string
     level_string = """  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  W  .  .  .  .  .  M  M  M 
@@ -82,7 +83,6 @@ if __name__ == '__main__':
     # Now lets do some random actions
     # First we need to enumerate the actions we can do in the environment
     action_input_mappings = grid.get_action_input_mappings()
-    action_definition_count = len(action_input_mappings)
 
     # These are the actions we can use
     available_action_input_mappings = {}
@@ -95,6 +95,7 @@ if __name__ == '__main__':
             available_action_input_mappings[k] = mapping
             action_names.append(k)
 
+    action_definition_count = len(available_action_input_mappings)
     # We're going to record a video for each of the players observations and the global observer
     player_1_video_recorder.start("player_1_video.mp4", player_1_observation.shape)
     player_2_video_recorder.start("player_2_video.mp4", player_2_observation.shape)
@@ -107,6 +108,7 @@ if __name__ == '__main__':
         action_name = action_names[action_definition]
         actionId = int(np.random.choice(list(action_input_mappings[action_name]["InputMappings"].keys())))
 
+        #TODO: These are basically always invalid. Can we used the masked RTS actions?
         # Alternate between player_1 and player_2 actions
         if j % 2 == 0:
             player_1_step_result = player_1.step(action_name, [x, y, actionId])

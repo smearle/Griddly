@@ -1,3 +1,4 @@
+from pdb import set_trace as T
 import colorsys
 
 import gym
@@ -83,6 +84,7 @@ class GymWrapper(gym.Env):
 
         self._player_last_observation = {}
 
+       #T()
         self.game.init()
 
     def get_tile_size(self, player=0):

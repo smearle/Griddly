@@ -1,3 +1,4 @@
+from pdb import set_trace as T
 import gym
 import numpy as np
 from griddly.util.vector_visualization import Vector2RGB
