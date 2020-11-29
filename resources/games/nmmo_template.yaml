@@ -16,7 +16,7 @@ Environment:
     - Name: player_dead
       InitialValue: 0
   Player:
-    Count: 50
+    Count: 1
     Observer:
       RotateWithAvatar: true
       TrackAvatar: true
@@ -35,42 +35,22 @@ Environment:
   Levels: # An initial placeholder level will be added at runtime using python.
 
 Actions:
-# - Name: spawn_gnome
-#   InputMapping:
-#     Internal: true
-#   Behaviours:
-#     - Src:
-#         Object: base
-#         Commands:
-#           - spawn: gnome
-#       Dst:
-#         Object: _empty
-
-#     - Src:
-#         Object: base
-#       Dst:
-#         Object: [base, puncher, gnome, pusher, movable_wall]
-#         Commands:
-#           - exec:
-#               Action: spawn_gnome
-#               Delay: 1
-#               Randomize: true
-
-# # Harvester costs 5 resources to build
-# - Name: build_gnome
-#   Behaviours:
-#     - Src:
-#         Preconditions:
-#           - gt: [player_resources, 5]
-#         Object: base
-#       Dst:
-#         Object: base
-#         Commands:
-#           - exec:
-#               Action: spawn_gnome
-#               Delay: 10
-#               Randomize: true
-
+  - Name: tick_hunger
+    Behaviours:
+      - Src:
+          Object: gnome
+          Commands:
+            - decr: health
+            - eq:
+                Arguments: [health, 0]
+                Commands:
+                  - remove: true
+            - exec:
+                # At next game tick, repeat.
+                Delay: 1
+                Action: tick_hunger
+        Dst:
+            Object: gnome
 
   - Name: gather
     Behaviours:
@@ -89,30 +69,6 @@ Actions:
                 Commands:
                   - remove: true
 
-#     # gnomes can gather minerals
-#     - Src:
-#         Object: gnome
-#         Commands:
-#           - incr: resources
-#           - reward: 1
-#       Dst:
-#         Object: minerals
-#         Commands:
-#           - decr: resources
-#           - eq:
-#               Arguments: [resources, 0]
-#               Commands:
-#                 - remove: true
-#     - Src:
-#         Object: gnome
-#         Commands:
-#           - decr: resources
-#           - reward: 1
-#       Dst:
-#         Object: base
-#         Commands:
-#           - incr: player_resources
-
   - Name: move
     Behaviours:
       # gnomes will disintegrate in lava
@@ -126,41 +82,15 @@ Actions:
         Dst:
           Object: lava
           Commands:
-            - set_tile: 1
-         #  - remove: true
+            - set_tile: 1 # the lave rises a bit
 
-      # movable objects can move into empty spaces and lava
+      # gnomes can move into empty spaces
       - Src:
           Object: gnome
           Commands:
             - mov: _dest # mov will move the object, _dest is the destination location of the action
         Dst:
           Object: _empty
-
-      # pushers can push objects
-#     - Src:
-#         Object: pusher
-#         Commands:
-#           - mov: _dest # mov will move the object, _dest is the destination location of the action
-#       Dst:
-#         Object: [movable_wall, gnome, puncher]
-#         Commands:
-#           - cascade: _dest # reapply the same action to the dest location of the action
-
-# - Name: punch
-#   Behaviours:
-#     - Src:
-#         Object: puncher
-#         Commands:
-#           - reward: 1
-#       Dst:
-#         Object: [puncher, gnome, pusher, base]
-#         Commands:
-#           - decr: health
-#           - eq:
-#               Arguments: [0, health]
-#               Commands:
-#                 - remove: true
 
 Objects:
   - Name: shrubs
@@ -184,20 +114,11 @@ Objects:
     Observers:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/wall-grey-1.png
-       #- Image: rock-1.png
           Offset: [0, 15]
 
   - Name: lava
     MapCharacter: L
     Observers:
-      Sprite2D:
-        - TilingMode: WALL_2 # Will tile walls with two images
-          Image:
-            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
-            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
-      Block2D:
-        - Color: [0.5, 0.5, 0.5]
-          Shape: square
       Isometric:
         - Image: oryx/oryx_iso_dungeon/lava-1.png
           Offset: [0, 4]
@@ -205,6 +126,10 @@ Objects:
           Offset: [0, 2]
 
   - Name: gnome
+    InitialActions:
+      # Start ticking hunger after an initial grace period.
+      - Action: tick_hunger
+        Delay: 10
     MapCharacter: H
     Variables:
       - Name: leaves
@@ -222,75 +147,3 @@ Objects:
           Scale: 0.5
       Isometric:
         - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
-        - Image: oryx/oryx_iso_dungeon/lava-1.png
-        # if a gnome dies in lava, they "become" the lava. Note that other gnomes cannot die here anymore.
-
-# - Name: minerals
-#   MapCharacter: M
-#   Variables:
-#     - Name: resources
-#       InitialValue: 200
-#   Observers:
-#     Sprite2D:
-#       - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
-#     Block2D:
-#       - Shape: triangle
-#         Color: [0.0, 1.0, 0.0]
-#         Scale: 1.0
-#     Isometric:
-#       - Image: oryx/oryx_iso_dungeon/minerals-1.png
-
-# - Name: pusher
-#   MapCharacter: P
-#   Variables:
-#     - Name: health
-#       InitialValue: 10
-#   Observers:
-#     Sprite2D:
-#       - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_crawler_queen_d1.png
-#     Block2D:
-#       - Shape: square
-#         Color: [0.2, 0.2, 0.6]
-#         Scale: 1.0
-#     Isometric:
-#       - Image: oryx/oryx_iso_dungeon/queen-1.png
-
-# - Name: puncher
-#   MapCharacter: p
-#   Variables:
-#     - Name: health
-#       InitialValue: 5
-#   Observers:
-#     Sprite2D:
-#       - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_beast_d1.png
-#     Block2D:
-#       - Color: [0.2, 0.6, 0.6]
-#         Shape: square
-#         Scale: 0.8
-#     Isometric:
-#       - Image: oryx/oryx_iso_dungeon/beast-1.png
-
-# - Name: movable_wall
-#   MapCharacter: w
-#   Observers:
-#     Sprite2D:
-#       - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img282.png
-#     Block2D:
-#       - Color: [0.8, 0.8, 0.8]
-#         Shape: square
-#     Isometric:
-#       - Image: oryx/oryx_iso_dungeon/crate-1.png
-
-# - Name: base
-#   MapCharacter: B
-#   Variables:
-#     - Name: health
-#       InitialValue: 10
-#   Observers:
-#     Sprite2D:
-#       - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img324.png
-#     Block2D:
-#       - Color: [0.8, 0.8, 0.3]
-#         Shape: triangle
-#     Isometric:
-#       - Image: oryx/oryx_iso_dungeon/base-1.png

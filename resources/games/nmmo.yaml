@@ -1,6 +1,23 @@
 Actions:
 - Behaviours:
   - Dst:
+      Object: gnome
+    Src:
+      Commands:
+      - decr: health
+      - eq:
+          Arguments:
+          - health
+          - 0
+          Commands:
+          - remove: true
+      - exec:
+          Action: tick_hunger
+          Delay: 1
+      Object: gnome
+  Name: tick_hunger
+- Behaviours:
+  - Dst:
       Commands:
       - decr: leaves
       - eq:
@@ -39,75 +56,74 @@ Environment:
   Description: An NMMO-type game. The idea is to set up an open-ended system wherein
     agents can progress from hunter gathering, to agriculture, to basic civilization.
   Levels:
-  - "W W W W W W H7 W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W\
-    \ W W W H19 W W W W W W W W \n W . R W . . . R . . S R . S S R . . W S . . S S\
-    \ S R S . . . W R . S . S W . S . . R . . S S S . S W \n W . . W . R S . . S S\
-    \ . S R S S . . R W W . . W . . S S S . . . . S W R . . S S R . . . W W S W S\
-    \ W \n W S . . . . R . . . . S S . R H16 . . R S R . S . . R . R . . . W . S R\
-    \ W . S W S R S . . . . W R . W \n W S W S . S R . S R H25 W S S S S S S W . S\
-    \ . . . . . S R . . S . R S S S . S . S W S . . S S . . R W \n W S . W S S R W\
-    \ W W R . . R S W S . . S S R S R S S S . . . . . . . . H33 . . S . . . R H50\
-    \ S . W . . W \n W . S . S . S . R S . . . S . . S R S S H31 . S S . H10 . . .\
-    \ S . . S W . S S S . W . S S S . S . . . W \n W . S . R R . . . . . . . . R .\
-    \ S W H14 R S H42 S . . . S . S S S . . . . R . W . . W . S W . . . . . W \n W\
-    \ . S . . . S R R . . . . . H29 . . S . R . S . S . . R . S . W R . S S . . .\
-    \ . W . S . R S . . . . W \n W S . R W . S . . W . S . R S W . S S . . S . S W\
-    \ R S . . S . S R W S S S R . . . . S R . . W . R W \n W W W S . . . . W W W S\
-    \ . . . . S S . . S . . R W S W W R R S . . . . S S S S . S . S R W S S S . W\
-    \ \n W . W . S . . W . . S R . S . S . . S . . . . W . S . . S S R R . . R S R\
-    \ R S . S . S W . . . R . W \n W . S R R S S S . S . S S R S R . S W S W . S .\
-    \ . W R . . S . W . S S W . . W . . S W S . R . S S W \n W . . . S S S . S W W\
-    \ . S W . . . . R H34 R . R . . S . S . R S S . S W . S R . S . W . . . S S .\
-    \ R W \n W . . . S . R . . . . . . . S . . W H47 S S S . . . . R S W R W . S .\
-    \ R . . . . . . W R S W . W R . W \n W W S . . H13 H5 S . . R W . . S . S . R\
-    \ . H37 S S R S . . . S . W . . S W . S S . . . . . S . . S S S W \n W S . S .\
-    \ . . H15 . S S . S W . . R S . S . . . S S . W S S S S S . . R . . S W . R .\
-    \ S . . S S . . W \n H6 S . W . S S . . . H46 . S . . . S . . . S . . S R . .\
-    \ . S S . W . R R . S . . . S S S S . . S S . W \n W . S W W . . S S S . . S .\
-    \ R S . . R W . S S . . . W S . . S . . S . R S S R S S . . W . . S . . W \n W\
-    \ R S R W . . S W S S W . . R W . . S . S . . . . W . W S . . S S . S S . . S\
-    \ . W . . . S . . . S W \n W R S H21 S R S . H32 S . . W S . . S S . . S R . .\
-    \ S R . . . S . H17 S S S S . . . . S S S . . . W S S W \n W . R . W . S H24 S\
-    \ . . W . R W S . W . W R S . . S S . . R S S R . S . . . W S S . S S S R S R\
-    \ H4 S W \n W . . . . . . W R . . . . W . . . S . S . . S S . . R . S . . S .\
-    \ . S R . . R . . S . . . . . S S W \n W . W . S R S S . R S . . R . . S R R .\
-    \ . . S . S S . S S R R . . . S . S . S . W S . . . . . . R W \n W . . W . W W\
-    \ . S R . . S . . . . . S S . . W S S . R . W S . S S . . S R S . S . S . S S\
-    \ . S S . W \n H27 . . W R . S . W S . W . S . . W S . . W . . . S S S S . S S\
-    \ H3 . S . . . S . R . S . . . W S . . W \n W . S S W S S . R . S S . . . S W\
-    \ . . . . R S S W . . . H12 . . . R . . . S W . S . H28 . S R S S . R W \n W R\
-    \ . . . . . R . . R . . R . S H23 . R W S W S S S S S S S W W . S S . . W S .\
-    \ . . . . . S . H18 S . W \n W H20 . . . . . . . S R . . S R W . . W . W R . S\
-    \ . S . R . S S . S H41 . . R S S S S S R W S . . . . W \n H38 . S . W S S S .\
-    \ . R . S R . . S . . . S S . . S . . S R R R . . R . . W S . . . . . . R S H26\
-    \ . . W \n W . . W . R . W . . R R S . S . . S . . R . . . . S . S . . S . W .\
-    \ H49 . . S . S . . . R . . W S S W \n W . . S S S . . . . W S W . . S . . S .\
-    \ . W . W . . . . . W W . . W S W S . . . S S S . S W . S R W \n W S . . S S .\
-    \ W R R . . W R S S . . . . S W H44 S R H2 S R S S R S S S S . . S . . S W . S\
-    \ S . S . . W \n W S . H9 . . . S W S S S . . . R H45 . S . . . W S S . S . R\
-    \ W . . . . S S S S . W W S . . S S . R . W \n W W S S . S W W . S W R W W . R\
-    \ S . . S W S . S . S R R S W S S R . S . S . . S . W . W S S . . W W \n W S R\
-    \ S R . . R . . . R S . R S . R . . . . S . S S . S S . S . S . R . S . . . .\
-    \ W . S S S S . . W \n W . . . . . . W . . R S W . S . . . S R R R . W . H30 S\
-    \ S . . S S S . . . . . S . S S . S . W . S . W \n W W . R . W . . . W R . . .\
-    \ R . . . R . W S . . W . R H1 . . . . R . . . S S S R H8 . . S W S . . . W \n\
-    \ W S R R W R W . S S S . R . . . . S . R S W S S W . . . . S . . S W S . . R\
-    \ . S . . R . W . . W S W \n W S H22 . . W . . R S R . . S . . R . W . S . S W\
-    \ S . . . . S . . . R . S S S . . S . . . S . S . . W \n W . . R . . W . R W R\
-    \ S . S W . S W S W R . . S S . W . S S . . R S R . S R . . . S . W . R W . .\
-    \ W \n W W . S . S . . . H40 . . S S . . . W S S . . . S S . S R . . R S . S .\
-    \ . S . . . S S . S W R S W S W \n W S . S W . . S S . W . W R . W . . . R . W\
-    \ . . . . . S . R S S R . S . H36 . W W W S R . . S S S . W \n W W . S . . . .\
-    \ . . S . R . . . R . W . W . S . R . . . . . S H43 R . S . S . . . . W . . W\
-    \ S S S . W \n W . . S . S S S H48 . S S W W W S S . S S S S R W . . . . S . S\
-    \ S S W S . . S . S . . S R . . R R . W \n W . S . . R . . R R W . S W . . . R\
-    \ R H39 S S . . S . S S . S . . R S . S W W S S S S . . . S . . . W \n W . . S\
-    \ . S . S . . . R . . . . S . S W W W . S S . S W . . . S W H11 . R . . . W W\
-    \ . R R S . . R W W \n W S . . . . . . . . S S . R . . W S . S . . . W S W . H35\
-    \ S . . W . R . . W . W S . . . . . . R S . W \n W S S . . . . R W S R . . . .\
-    \ S S . . S . W . . S . R . . . S . S S . . . S W . S S S . R . . S R W \n W W\
+  - "W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W\
+    \ W W W W W W W W W W W \n W W R W . . W . . R . . R W R W W W W . . R W . . R\
+    \ W . W R R . . . . . . R . . . W . W . W . R . W \n W . W . W . W . . W . . .\
+    \ . W . W W . W . . W . R W . . W . R . R W . R W . W W . W R . . W . R . W \n\
+    \ W W . . . . . . . W . . . . . . . . R W W R . . . . R W . . . W . . . . . .\
+    \ . R W . W W . . . W W W \n W . . . . . . R . . . . W . . . . . . . . . R . .\
+    \ W W W . R R W . W . R W . . . . . W W W . W . W W \n W W . R . W W . . . . W\
+    \ . . R . . . . R W . . . . W . W R R . . . . W . W . W W . R W . W W . . W W\
+    \ \n W . . . . . . R . . . . . . . . . . W W . . W . . . W . W . . W W . W . .\
+    \ . . . R . W . R . W R W W \n W W W . . . R W . R W . W R R . R . . . . W W .\
+    \ . R . . . . . . . . . W . . W . . W . . . R R W . W \n W W . . . . W . . W .\
+    \ W . W W . W W W W W R W . . . . R . . . . R . . . . W . . . . W . . W . . .\
+    \ W \n W W . R . . . W W W . . W . R R . . . W . W . W W . . . R . . . . . . .\
+    \ W R R R . R W . W . . . . W \n W . W . . . . . W . W . . . R R W . . . . . .\
+    \ . W . . W . . W W . . . . W . . R W . . . W . . . R W \n W W . . . R . W W .\
+    \ . W . R W . . W . . W . . . R . . R . W . W . W R W W . . . . W W R W R . .\
+    \ W W \n W . W . . R . . R R . R W . . R W . W . . . . . W . . . . . . W R . .\
+    \ . W W R W W . R . . . . W W W \n W . . . . . . . . . R . . W W W . . W W . W\
+    \ . R W . . . . W . . . . . W . W . . W R . . W . R W . W \n W . W R . . . . W\
+    \ W . . . W W R . W . . W . . . . . . . . R W . . . . . R R . . . W . . W . .\
+    \ W . W \n W . R . W . W W W . W . W R . . W R . . . W W W . . W R . . R . . .\
+    \ . W . . R . . . . W R . R R . W \n W . . R . R . . . W . . . . . R . . R . .\
+    \ . . W W W W . . R . W . . R . W W . . W R . . . W . . W W \n W W . . W . . .\
+    \ . . . R . . W . . . . . . . . W . R . . R . W W . . . . W . . . . . W . . .\
+    \ W . . W \n W . R . . . W . . . . . . . R W W R W . . . W W . . . . . . . R R\
+    \ . W . . W . . R . R W . W R . . W \n W W W W R W . . . W . . . W . . . . . .\
+    \ . . R . . W . . . . R R W . . W R R R W W W . . W R W W . W \n W W W . . . .\
+    \ W W . . . W . . . . R . . . . . . . . . . R R . R R W . . . . W . W W R R R\
+    \ R W . W W \n W . R . . W R W . . W . . W . W . R W W W W W R . . . . . W R .\
+    \ W . . R . . . . . W . . . W . W . W \n W . . R . . W . W . . . . W R . R W .\
+    \ W . . R . R W . . . W . . . . R . . . . R W . . W . W R . . W \n W . W . . .\
+    \ . . . R . . . W . . R . . . . W . W W W R . . W . R . . . . W W . . R R W .\
+    \ . W . W W W \n W . . . . . . W . . . . . W R W R . . . . . . . . . W . . . W\
+    \ . . . R . . R . W . . R . W . W R . W \n W W R . . R . . . . R . . W R . . W\
+    \ R . . R R W . . W . W R W W . . W R . W . W W . . W . . . R W W \n W . W R W\
+    \ . . . R . . . W . W . . W . . . . . . . . . R . . . . . R R W W W R . W . .\
+    \ . W W . . . W \n W R W W R . . . . . R W W . . . . W R R . W W . W R . . R .\
+    \ W . . R . . . . W . . . . . . W . W . W \n W . R W R R W . . W . . R W . . W\
+    \ . W R W W . . . R W . . W . . . W . R W . . . R W . . . . R W W W \n W . W .\
+    \ R . W . . W W W . . . R W . R . W R . . W . . W W R . . R W . . . . . . . W\
+    \ . . R . R . . W \n W . W R . W H1 . . . R . W . R . . . R . . . R W . . . .\
+    \ R W W R R W W . R . . . . W R . . . W R . W \n W . . W W . . . R R . W . R R\
+    \ . . . W . . . R . . . . . . . . . . . . W R R . . R . . . R . . W . W \n W .\
+    \ . . . . W W W . W . . . . R . W . R . W . . W W R . W . . . . . W . W . . .\
+    \ . W . . . W R . W W \n W . . . W . . . . . . R R R W R R . W . . W . R . . .\
+    \ W R W W . . . . R . . . . W . . . . W R R . W \n W . W . R . . . . . W R . .\
+    \ . . . W R W . R . . . W . . W . R . . . . . . . . . . . R R R . . W . W \n W\
+    \ R . . . W W W W W . W . . . . W . R R W . . . . . W W . R . . . . . . . W W\
+    \ . . . . W W R R . W W \n W R W . . W W . . R . W . . W R W W R W W . W W . R\
+    \ W R R R . . . W . W . W . W W R R R R W R . . W \n W R . W . . . . R R . W .\
+    \ . . . R . . W . . . . . W W . . W W . . W . . R . . W . R R W W . . W . W \n\
+    \ W . . R . W R W . . W R R R . W R . . . . . . . R . W . R . W W W . W . . .\
+    \ . R . . . . W W W . W W \n W W R . . . . W R . . . W . W . . . W . W . . . .\
+    \ . R W W . R . R . W W . . R . . W W W W . R W . W \n W W . . . . W R R . W W\
+    \ R R . . . . . . . . W R W W R . . . R . W . . . . W . . . W R . W . W . R W\
+    \ \n W . . . R . . R . . R W . W . W . . R . R . . . . . . . . W . R W R W . .\
+    \ . . W R . W R . . . R . W \n W . . R . R . W . . R . . . . R W R . W . . . .\
+    \ R R . W R . . . . . . . . W . . . W R . . . . R R W \n W . W W R W W . . W R\
+    \ . . R W W . . R . . . . . W W . . . W . . . . W . . . . R . R . R . W . . .\
+    \ W \n W . . . W . R W . . W . R W . . . . W . R . . R . . . . W R . R . W . W\
+    \ . W R . . W W W . R W . . W \n W . . . R . . R W R R W R . . . . R . . . R .\
+    \ . . . W R R . . . . . R W . W . . . W . . W . W . R W \n W . . R . W . W . .\
+    \ . . . . W W . W . . . W R . R . . . . W . W . W W W . W . . R R . W . R . .\
+    \ . W \n W . W R . W W W . W W . . R . . . . W . . W W . W W W . R W R . R R .\
+    \ . R . . . . . W . R W . . . W \n W W R . W . . W W . . W . R . . W . R . . .\
+    \ W . W . W W . W . . . . . . R . W . . R . . . . . . W W \n W W W W W W W W W\
     \ W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W W\
-    \ W W W W W W W W W W \n"
+    \ W W W \n"
   Name: nmmo
   Observers:
     Isometric:
@@ -121,7 +137,7 @@ Environment:
       TileSize: 16
   Player:
     AvatarObject: gnome
-    Count: 50
+    Count: 1
     Observer:
       Height: 7
       OffsetX: 0
@@ -146,6 +162,14 @@ Objects:
   Variables:
   - InitialValue: 1
     Name: leaves
+- MapCharacter: W
+  Name: water
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/water-1.png
+      Offset:
+      - 0
+      - 4
 - MapCharacter: R
   Name: rock
   Observers:
@@ -154,7 +178,22 @@ Objects:
       Offset:
       - 0
       - 15
-- MapCharacter: H
+- MapCharacter: L
+  Name: lava
+  Observers:
+    Isometric:
+    - Image: oryx/oryx_iso_dungeon/lava-1.png
+      Offset:
+      - 0
+      - 4
+    - Image: oryx/oryx_iso_dungeon/lava-1.png
+      Offset:
+      - 0
+      - 2
+- InitialActions:
+  - Action: tick_hunger
+    Delay: 10
+  MapCharacter: H
   Name: gnome
   Observers:
     Block2D:
@@ -166,7 +205,6 @@ Objects:
       Shape: square
     Isometric:
     - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
-    - Image: oryx/oryx_iso_dungeon/lava-1.png
     Sprite2D:
     - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
   Variables:
@@ -176,27 +214,4 @@ Objects:
     Name: resources
   - InitialValue: 10
     Name: health
-- MapCharacter: W
-  Name: lava
-  Observers:
-    Block2D:
-    - Color:
-      - 0.5
-      - 0.5
-      - 0.5
-      Shape: square
-    Isometric:
-    - Image: oryx/oryx_iso_dungeon/lava-1.png
-      Offset:
-      - 0
-      - 4
-    - Image: oryx/oryx_iso_dungeon/lava-1.png
-      Offset:
-      - 0
-      - 2
-    Sprite2D:
-    - Image:
-      - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
-      - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
-      TilingMode: WALL_2
 Version: '0.1'

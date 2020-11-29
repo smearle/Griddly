@@ -7,11 +7,11 @@ class MapGen():
     MAP_WIDTH = 50
     def __init__(self):
         self.probs = {
-                'grass':  0.4,
-                'water':  0.20,
-                'shrubs': 0.30,
-                'rock':   0.05,
-                'lava':   0.05,
+                'grass':  0.60,
+                'water':  0.25,
+                'shrubs': 0.00,
+                'rock':   0.15,
+                'lava':   0.00,
                 }
         self.chars = {
                 'grass': '.'
@@ -54,10 +54,11 @@ class MapGen():
         idxs = np.array(list(zip(idxs[0], idxs[1]))) + 1
         ixs = np.random.choice(len(idxs), self.n_players, replace=False)
         coords = idxs[ixs]
-        level_string[0, :] = self.chars['lava']
-        level_string[-1, :] = self.chars['lava']
-        level_string[:, 0] = self.chars['lava']
-        level_string[:, -2] = self.chars['lava']
+        border_tile = 'water'
+        level_string[0, :] = self.chars[border_tile]
+        level_string[-1, :] = self.chars[border_tile]
+        level_string[:, 0] = self.chars[border_tile]
+        level_string[:, -2] = self.chars[border_tile]
         for j, coord in enumerate(coords):
             level_string[coord[0], coord[1]] = self.player_char + str(j+1)
 #       level_string[coords[:, 0], coords[:, 1]] = self.player_char
