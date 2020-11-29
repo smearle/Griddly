@@ -7,10 +7,11 @@ class MapGen():
     MAP_WIDTH = 50
     def __init__(self):
         self.probs = {
-                'grass':  0.5,
-                'shrubs': 0.3,
-                'rock':   0.1,
-                'lava':   0.1,
+                'grass':  0.4,
+                'water':  0.20,
+                'shrubs': 0.30,
+                'rock':   0.05,
+                'lava':   0.05,
                 }
         self.chars = {
                 'grass': '.'
@@ -50,7 +51,7 @@ class MapGen():
         # need to take into account column of newlines
         level_string = np.random.choice(init_tiles, size=(MapGen.MAP_WIDTH, MapGen.MAP_WIDTH+1), p=probs).astype(self.utf_enc)
         idxs = np.where(level_string[1:-1, 1:-2])
-        idxs = np.array(list(zip(idxs[0], idxs[1])))
+        idxs = np.array(list(zip(idxs[0], idxs[1]))) + 1
         ixs = np.random.choice(len(idxs), self.n_players, replace=False)
         coords = idxs[ixs]
         level_string[0, :] = self.chars['lava']

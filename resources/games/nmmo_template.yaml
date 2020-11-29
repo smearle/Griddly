@@ -172,6 +172,13 @@ Objects:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/bush-1.png
 
+  - Name: water
+    MapCharacter: W
+    Observers:
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/water-1.png
+          Offset: [0, 4]
+
   - Name: rock
     MapCharacter: R
     Observers:
@@ -180,20 +187,22 @@ Objects:
        #- Image: rock-1.png
           Offset: [0, 15]
 
-# - Name: minerals
-#   MapCharacter: M
-#   Variables:
-#     - Name: resources
-#       InitialValue: 200
-#   Observers:
-#     Sprite2D:
-#       - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
-#     Block2D:
-#       - Shape: triangle
-#         Color: [0.0, 1.0, 0.0]
-#         Scale: 1.0
-#     Isometric:
-#       - Image: oryx/oryx_iso_dungeon/minerals-1.png
+  - Name: lava
+    MapCharacter: L
+    Observers:
+      Sprite2D:
+        - TilingMode: WALL_2 # Will tile walls with two images
+          Image:
+            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
+            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
+      Block2D:
+        - Color: [0.5, 0.5, 0.5]
+          Shape: square
+      Isometric:
+        - Image: oryx/oryx_iso_dungeon/lava-1.png
+          Offset: [0, 4]
+        - Image: oryx/oryx_iso_dungeon/lava-1.png
+          Offset: [0, 2]
 
   - Name: gnome
     MapCharacter: H
@@ -215,7 +224,21 @@ Objects:
         - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
         - Image: oryx/oryx_iso_dungeon/lava-1.png
         # if a gnome dies in lava, they "become" the lava. Note that other gnomes cannot die here anymore.
-        # TODO: tile with gnome floating in lava.
+
+# - Name: minerals
+#   MapCharacter: M
+#   Variables:
+#     - Name: resources
+#       InitialValue: 200
+#   Observers:
+#     Sprite2D:
+#       - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_items/tg_items_crystal_green.png
+#     Block2D:
+#       - Shape: triangle
+#         Color: [0.0, 1.0, 0.0]
+#         Scale: 1.0
+#     Isometric:
+#       - Image: oryx/oryx_iso_dungeon/minerals-1.png
 
 # - Name: pusher
 #   MapCharacter: P
@@ -246,23 +269,6 @@ Objects:
 #         Scale: 0.8
 #     Isometric:
 #       - Image: oryx/oryx_iso_dungeon/beast-1.png
-
-  - Name: lava
-    MapCharacter: W
-    Observers:
-      Sprite2D:
-        - TilingMode: WALL_2 # Will tile walls with two images
-          Image:
-            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img33.png
-            - oryx/oryx_tiny_galaxy/tg_sliced/tg_world_fixed/img40.png
-      Block2D:
-        - Color: [0.5, 0.5, 0.5]
-          Shape: square
-      Isometric:
-        - Image: oryx/oryx_iso_dungeon/lava-1.png
-          Offset: [0, 4]
-        - Image: oryx/oryx_iso_dungeon/lava-1.png
-          Offset: [0, 2]
 
 # - Name: movable_wall
 #   MapCharacter: w
