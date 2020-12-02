@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     while True:
         reset()
-
+        while True: pass
         while True:
             act = env.action_space.sample()
             obs, reward, done, infos = env.step(act)

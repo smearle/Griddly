@@ -73,6 +73,8 @@ class NMMOWrapper(gym.Wrapper):
             reward = 0
             done = True
             info = {}
+            # Just a no-op.
+            _ = self.env._players[player_id].step('move', [0, 0])
         else:
            #x = action[0]
            #y = action[1]

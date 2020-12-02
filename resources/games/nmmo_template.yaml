@@ -16,7 +16,7 @@ Environment:
     - Name: player_dead
       InitialValue: 0
   Player:
-    Count: 1
+    Count: 10
     Observer:
       RotateWithAvatar: true
       TrackAvatar: true
@@ -36,18 +36,33 @@ Environment:
 
 Actions:
   - Name: tick_hunger
+    InputMapping:
+      Inputs:
+        1:
+          Description: Tick self
+          OrientationVector: [0, 0]
+      Relative: true
+      Internal: true
     Behaviours:
       - Src:
           Object: gnome
           Commands:
-            - decr: health
+#           - gt:
+#               Arguments: [leaves, 0]
+#               Commands:
+#                 - remove: true
+#                 - decr: health
             - eq:
                 Arguments: [health, 0]
                 Commands:
+                 #- exec:
+                 #  # If hunger is depleted, begin to decrement health
+                 #  Delay: ${_delay}
+                 #  Src
                   - remove: true
             - exec:
                 # At next game tick, repeat.
-                Delay: 1
+                Delay: ${_delay} # scale this dynamically to match number of players (temporary hack)
                 Action: tick_hunger
         Dst:
             Object: gnome
@@ -59,6 +74,7 @@ Actions:
           Object: gnome
           Commands:
             - incr: leaves
+         #  - incr: health
             - reward: 1
         Dst:
           Object: shrubs
@@ -97,7 +113,7 @@ Objects:
     MapCharacter: S
     Variables:
       - Name: leaves
-        InitialValue: 1
+        InitialValue: 2
     Observers:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/bush-1.png
@@ -129,7 +145,7 @@ Objects:
     InitialActions:
       # Start ticking hunger after an initial grace period.
       - Action: tick_hunger
-        Delay: 10
+        Delay: ${_init_delay}
     MapCharacter: H
     Variables:
       - Name: leaves
