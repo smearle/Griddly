@@ -5,6 +5,14 @@ from pdb import set_trace as T
 import gym
 import numpy as np
 
+
+import copy
+
+for env in copy.deepcopy(gym.envs.registry.env_specs):
+    if 'GDY' in env:
+        print("Remove {} from registry".format(env))
+        del gym.envs.registry.env_specs[env]
+
 #from gym.utils.play import play
 import griddly
 from griddly import GymWrapperFactory, gd
@@ -13,13 +21,6 @@ from griddly.nmmo.wrappers import NMMOWrapper
 from griddly.util.rts_tools import InvalidMaskingRTSWrapper
 
 if __name__ == '__main__':
-
-    import copy
-
-    for env in copy.deepcopy(gym.envs.registry.env_specs):
-        if 'GDY' in env:
-            print("Remove {} from registry".format(env))
-            del gym.envs.registry.env_specs[env]
 
     # NB: The nmmo environment is designed to to render with an ISOMETRIC global observer only.
     wrapper = GymWrapperFactory()
@@ -42,13 +43,19 @@ if __name__ == '__main__':
         env.reset(level_id=None, level_string=level_string)
         env.render(observer='global')
 
-    while True:
+    i = 0
+    while i < 10:
+        i += 1
         reset()
-        while True: pass
+        j = 0
         while True:
             act = env.action_space.sample()
             obs, reward, done, infos = env.step(act)
             env.render(observer='global')
 
-            if done:
+           #if j != 1 and j % 10 == 0:
+           #    T()
+
+            if done or j == 1000:
                 break
+            j += 1 

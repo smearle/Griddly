@@ -26,17 +26,32 @@ class MapGen():
     MAP_WIDTH = 50
     N_PLAYERS = 50
     INIT_DELAY = 10 # how long to wait before decrementing hunger & thirst
+    INIT_HEALTH = 10
+    INIT_THIRST = 10
+    INIT_HUNGER = 10
+    SHRUB_RESPAWN = 15
+
+    VAR_DICT = {
+            '${_init_delay}':    INIT_DELAY * N_PLAYERS,
+            '${_delay}':         1 * N_PLAYERS,
+            '${_init_health}':   INIT_HEALTH,
+            '${_init_hunger}':   INIT_HUNGER,
+            '${_init_thirst}':   INIT_THIRST,
+            '${_shrub_respawn}': SHRUB_RESPAWN * N_PLAYERS,
+            }
+
     def __init__(self):
         self.probs = {
-                'grass':  0.50,
-                'water':  0.15,
-                'shrubs': 0.15,
+                'grass':  0.60,
+                'water':  0.10,
+                'shrub':  0.10,
                 'rock':   0.10,
                 'lava':   0.10,
                 }
         self.chars = {
                 'grass': '.'
                 }
+        self.border_tile = 'water'
 
     def get_init_tiles(self, yaml_path):
         # Using a template to generate the runtime file allows for preservation of comments and structure. And possibly other tricks... (evolution of game entities and mechanics)
@@ -46,7 +61,7 @@ class MapGen():
         tile_types = list(self.probs.keys())
         with open(yaml_template_path) as f:
             contents = yaml.load(f, Loader=yaml.FullLoader)
-        self.utf_enc = 'U' + str(len(str(contents['Environment']['Player']['Count'])) + 1)
+        self.utf_enc = 'U' + str(len(str(MapGen.N_PLAYERS)) + 1)
         objects = contents['Objects']
         for obj in objects:
             obj_name = obj['Name']
@@ -63,11 +78,7 @@ class MapGen():
         contents['Environment']['Levels'] = [level_string] # placeholder map
         contents['Environment']['Player']['Count'] = MapGen.N_PLAYERS # set num players
         #HACK: scale delays to num players
-        var_dict = {
-                '${_init_delay}': MapGen.INIT_DELAY * MapGen.N_PLAYERS,
-                '${_delay}': 1 * MapGen.N_PLAYERS
-                }
-        replace_vars(contents, var_dict)
+        replace_vars(contents, MapGen.VAR_DICT)
         with open(yaml_path, 'w') as f:
             yaml.dump(contents, f)
 
@@ -81,7 +92,7 @@ class MapGen():
         idxs = np.array(list(zip(idxs[0], idxs[1]))) + 1
         ixs = np.random.choice(len(idxs), MapGen.N_PLAYERS, replace=False)
         coords = idxs[ixs]
-        border_tile = 'lava'
+        border_tile = self.border_tile
         level_string[0, :] = self.chars[border_tile]
         level_string[-1, :] = self.chars[border_tile]
         level_string[:, 0] = self.chars[border_tile]

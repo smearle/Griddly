@@ -96,7 +96,11 @@ class NMMOWrapper(gym.Wrapper):
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
 
-        return reset_result
+        # FIXME: hack (to avoid returning global observation)
+        step_result = self.step(dict([(i, [0,0,0]) for i in range(self.player_count)]))
+
+#       return reset_result
+        return step_result[0]
 
 #   def get_unit_location_mask(self, player_id, mask_type='full'):
 #       """
@@ -151,13 +155,13 @@ class NMMOWrapper(gym.Wrapper):
     def _create_action_space(self):
 
         # Convert action to GriddlyActionASpace
-        self.player_count = self.env._grid.get_player_count()
-        self.action_input_mappings = self.env._grid.get_action_input_mappings()
+        self.player_count = self.env.player_count
+        self.action_input_mappings = self.env.action_input_mappings
 
-        self._grid_width = self.env._grid.get_width()
-        self._grid_height = self.env._grid.get_height()
+        self._grid_width = self.env.game.get_width()
+        self._grid_height = self.env.game.get_height()
 
-        self.avatar_object = self.env._grid.get_avatar_object()
+        self.avatar_object = self.env.gdy.get_avatar_object()
 
         has_avatar = self.avatar_object is not None and len(self.avatar_object) > 0
 

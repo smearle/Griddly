@@ -1,7 +1,8 @@
 Version: "0.1"
 Environment:
   Name: nmmo
-  Description: An NMMO-type game. The idea is to set up an open-ended system wherein agents can progress from hunter gathering, to agriculture, to basic civilization.
+  Description: An NMMO-type game. The idea is to set up an open-ended system wherein agents can progress from hunter\
+   \ gathering, to agriculture, to basic civilization.
   Observers:
     Sprite2D:
       TileSize: 16
@@ -16,7 +17,7 @@ Environment:
     - Name: player_dead
       InitialValue: 0
   Player:
-    Count: 10
+    Count: 1
     Observer:
       RotateWithAvatar: true
       TrackAvatar: true
@@ -35,11 +36,11 @@ Environment:
   Levels: # An initial placeholder level will be added at runtime using python.
 
 Actions:
-  - Name: tick_hunger
+  - Name: tick_state
     InputMapping:
       Inputs:
         1:
-          Description: Tick self
+          Description: Tick the gnome's internal state
           OrientationVector: [0, 0]
       Relative: true
       Internal: true
@@ -47,43 +48,98 @@ Actions:
       - Src:
           Object: gnome
           Commands:
-#           - gt:
-#               Arguments: [leaves, 0]
-#               Commands:
-#                 - remove: true
-#                 - decr: health
+            # if hunger > 0: hunger -= 1, health += 1
+            - gt:
+                Arguments: [hunger, 0]
+                Commands:
+                  - decr : hunger
+                  - incr: health
+            # if hunger == 0, health -= 1
             - eq:
+                Arguments: [hunger, 0]
+                Commands:
+                  - decr: health
+            # if thirst > 0: thirst -= 1, health += 1
+            - gt:
+                Arguments: [thirst, 0]
+                Commands:
+                  - decr : thirst
+                  - incr: health
+            # if thirst == 0, health -= 1
+            - eq:
+                Arguments: [thirst, 0]
+                Commands:
+                  - decr: health
+            # if health < 0, die
+            - lt:
                 Arguments: [health, 0]
                 Commands:
-                 #- exec:
-                 #  # If hunger is depleted, begin to decrement health
-                 #  Delay: ${_delay}
-                 #  Src
                   - remove: true
+            # keep ticking
             - exec:
-                # At next game tick, repeat.
-                Delay: ${_delay} # scale this dynamically to match number of players (temporary hack)
-                Action: tick_hunger
+                Action: tick_state
+                Delay: ${_delay}
+
         Dst:
             Object: gnome
 
+  - Name: spawn_shrub
+    InputMapping:
+      Inputs:
+        1:
+          Description: Respawn a depleted shrub after some time.
+          VectorToDest: [0, 0]
+      Relative: true
+      Internal: true
+    Behaviours:
+      - Src:
+          Object: shrub
+          Commands:
+            - spawn: shrub
+        Dst:
+          Object: _empty
+
   - Name: gather
     Behaviours:
-      # gnomes can gather shrubs
+      # gnomes can gather shrub
       - Src:
           Object: gnome
           Commands:
-            - incr: leaves
-         #  - incr: health
-            - reward: 1
+            #FIXME: This does not work for some reason.
+            # leaves give +5 hunger
+      #     - incr: hunger
+      #     - incr: hunger
+      #     - incr: hunger
+      #     - incr: hunger
+      #     - incr: hunger
+
         Dst:
-          Object: shrubs
+          Object: shrub
           Commands:
+            - incr: src.hunger
+            - incr: src.hunger
+            - incr: src.hunger
+            - incr: src.hunger
+            - incr: src.hunger
             - decr: leaves
-            - eq:
-                Arguments: [leaves, 0]
-                Commands:
-                  - remove: true
+           #- eq:
+           #    Arguments: [leaves, 0]
+           #    Commands:
+            - exec:
+                Action: spawn_shrub
+                Delay: ${_shrub_respawn}
+            - remove: true
+      - Src:
+            Object: gnome
+            Commands:
+              # water gives +5 thirst
+              - incr: thirst
+              - incr: thirst
+              - incr: thirst
+              - incr: thirst
+              - incr: thirst
+        Dst:
+          Object: water
 
   - Name: move
     Behaviours:
@@ -109,11 +165,12 @@ Actions:
           Object: _empty
 
 Objects:
-  - Name: shrubs
+  - Name: shrub
     MapCharacter: S
     Variables:
+      # Actions are applied to the destination object first.
       - Name: leaves
-        InitialValue: 2
+        InitialValue: 1
     Observers:
       Isometric:
         - Image: oryx/oryx_iso_dungeon/bush-1.png
@@ -144,16 +201,18 @@ Objects:
   - Name: gnome
     InitialActions:
       # Start ticking hunger after an initial grace period.
-      - Action: tick_hunger
+      - Action: tick_state
         Delay: ${_init_delay}
     MapCharacter: H
     Variables:
-      - Name: leaves
-        InitialValue: 0
+      - Name: health
+        InitialValue: 20
+      - Name: hunger
+        InitialValue: 20
+      - Name: thirst
+        InitialValue: 20
       - Name: resources
         InitialValue: 0
-      - Name: health
-        InitialValue: 10
     Observers:
       Sprite2D:
         - Image: oryx/oryx_tiny_galaxy/tg_sliced/tg_monsters/tg_monsters_jelly_d1.png
