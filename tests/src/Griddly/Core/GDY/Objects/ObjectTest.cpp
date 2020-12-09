@@ -8,7 +8,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#define _P(X) std::make_shared<int32_t>(X)
+#define _V(X) std::make_shared<int32_t>(X)
 #define _Y(X) YAML::Node(X)
 
 using ::testing::_;
@@ -142,7 +142,7 @@ TEST(ObjectTest, getPlayerId) {
 
 TEST(ObjectTest, getVariables) {
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  auto object = std::shared_ptr<Object>(new Object("object", 0, 0, {{"test_param", _P(20)}}, nullptr));
+  auto object = std::shared_ptr<Object>(new Object("object", 0, 0, {{"test_param", _V(20)}}, nullptr));
 
   ASSERT_EQ(*object->getVariableValue("test_param"), 20);
 
@@ -166,7 +166,7 @@ TEST(ObjectTest, actionBoundToSrc) {
 
   srcObject->addActionSrcBehaviour("action", dstObjectName, "nop", {}, {});
 
-  auto srcResult = srcObject->onActionSrc(mockActionPtr);
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
 
   ASSERT_FALSE(srcResult.abortAction);
 
@@ -190,6 +190,24 @@ TEST(ObjectTest, actionBoundToDst) {
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
 }
 
+// Test that if the destination object returns _empty/is nullptr then we still perform source action commands based on the dstObjectName
+// This can be the case when destination objects are removed during a behaviour
+TEST(ObjectTest, actionDestinationObjectDifferentFromOriginalObject) {
+  auto srcObjectName = "srcObject";
+  auto dstObjectName = "dstObject";
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {}, nullptr));
+
+  auto mockActionPtr = setupAction("action", srcObject, glm::ivec2{1,1});
+
+  srcObject->addActionSrcBehaviour("action", dstObjectName, "nop", {}, {});
+
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
+
+  ASSERT_FALSE(srcResult.abortAction);
+
+  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockActionPtr.get()));
+}
+
 // source command is registered for dst object and action, but not performed on different dst object
 TEST(ObjectTest, srcActionNoBehaviourForDstObject) {
   auto srcObjectName = "srcObject";
@@ -201,7 +219,7 @@ TEST(ObjectTest, srcActionNoBehaviourForDstObject) {
 
   srcObject->addActionSrcBehaviour("action", "not_dst_object", "nop", {}, {});
 
-  auto srcResult = srcObject->onActionSrc(mockActionPtr);
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
 
   ASSERT_TRUE(srcResult.abortAction);
 
@@ -217,7 +235,7 @@ TEST(ObjectTest, srcActionNoBehaviourForAction) {
 
   auto mockActionPtr = setupAction("action", srcObject, dstObject);
 
-  auto srcResult = srcObject->onActionSrc(mockActionPtr);
+  auto srcResult = srcObject->onActionSrc(dstObjectName, mockActionPtr);
 
   ASSERT_TRUE(srcResult.abortAction);
 
@@ -297,7 +315,7 @@ BehaviourResult addCommandsAndExecute(ActionBehaviourType type, std::shared_ptr<
     case ActionBehaviourType::SOURCE: {
       auto dstObjectName = dstObjectPtr == nullptr ? "_empty" : dstObjectPtr->getObjectName();
       srcObjectPtr->addActionSrcBehaviour(action->getActionName(), dstObjectName, commandName, commandArgumentMap, conditionalCommands);
-      return srcObjectPtr->onActionSrc(action);
+      return srcObjectPtr->onActionSrc(dstObjectName, action);
     }
   }
 
@@ -391,8 +409,8 @@ TEST(ObjectTest, command_override) {
 }
 
 TEST(ObjectTest, command_incr) {
-  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _P(20)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _P(20)}});
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "incr", {{"0", _Y("test_param")}}, srcObjectPtr, dstObjectPtr);
@@ -408,8 +426,8 @@ TEST(ObjectTest, command_incr) {
 }
 
 TEST(ObjectTest, command_decr) {
-  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _P(20)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _P(20)}});
+  auto srcObjectPtr = setupObject("srcObject", {{"test_param", _V(20)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"test_param", _V(20)}});
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "decr", {{"0", _Y("test_param")}}, srcObjectPtr, dstObjectPtr);
@@ -497,8 +515,8 @@ TEST(ObjectTest, command_mov_action_src) {
 
 TEST(ObjectTest, command_mov_action_params) {
   auto mockGridPtr = mockGrid();
-  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(3, 3), {{"mov_x", _P(7)}, {"mov_y", _P(12)}}, mockGridPtr);
-  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(2, 3), {{"mov_x", _P(8)}, {"mov_y", _P(10)}}, mockGridPtr);
+  auto srcObjectPtr = setupObject(1, "srcObject", glm::ivec2(3, 3), {{"mov_x", _V(7)}, {"mov_y", _V(12)}}, mockGridPtr);
+  auto dstObjectPtr = setupObject(1, "dstObject", glm::ivec2(2, 3), {{"mov_x", _V(8)}, {"mov_y", _V(10)}}, mockGridPtr);
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "mov", {{"0", _Y("mov_x")}, {"1", _Y("mov_y")}}, srcObjectPtr, dstObjectPtr);
@@ -773,13 +791,13 @@ TEST(ObjectTest, command_change_to) {
   EXPECT_CALL(*mockGridPtr, removeObject(Eq(srcObjectPtr)))
       .Times(1)
       .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), Eq(glm::ivec2(0, 0)), Eq(newObjectPtr)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), Eq(glm::ivec2(0, 0)), Eq(newObjectPtr), Eq(true)))
       .Times(1);
 
   EXPECT_CALL(*mockGridPtr, removeObject(Eq(dstObjectPtr)))
       .Times(1)
       .WillOnce(Return(true));
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(2), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(2), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr), Eq(true)))
       .Times(1);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "change_to", {{"0", _Y("newObject")}}, srcObjectPtr, dstObjectPtr);
@@ -845,7 +863,7 @@ TEST(ObjectTest, command_spawn) {
       .Times(1)
       .WillRepeatedly(Return(newObjectPtr));
 
-  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr)))
+  EXPECT_CALL(*mockGridPtr, addObject(Eq(1), Eq(glm::ivec2(1, 0)), Eq(newObjectPtr), Eq(true)))
       .Times(1);
 
   auto srcResult = addCommandsAndExecute(ActionBehaviourType::SOURCE, mockActionPtr, "spawn", {{"0", _Y("newObject")}}, srcObjectPtr, nullptr);
@@ -871,8 +889,8 @@ TEST(ObjectTest, command_eq) {
   //*           Commands:
   //*             - decr: resource
 
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _P(0)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _P(1)}});
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}});
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -904,8 +922,8 @@ TEST(ObjectTest, command_eq_qualifiers) {
   //*           Commands:
   //*             - decr: resource
 
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _P(0)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _P(1)}});
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}});
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -937,8 +955,8 @@ TEST(ObjectTest, command_lt) {
   //*           Commands:
   //*             - decr: resource
 
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _P(0)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _P(1)}});
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(0)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(1)}});
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -968,8 +986,8 @@ TEST(ObjectTest, command_gt) {
   //*           Commands:
   //*             - decr: resource
 
-  auto srcObjectPtr = setupObject("srcObject", {{"resource", _P(1)}});
-  auto dstObjectPtr = setupObject("dstObject", {{"resource", _P(2)}});
+  auto srcObjectPtr = setupObject("srcObject", {{"resource", _V(1)}});
+  auto dstObjectPtr = setupObject("dstObject", {{"resource", _V(2)}});
 
   auto mockActionPtr = setupAction("action", srcObjectPtr, dstObjectPtr);
 
@@ -989,7 +1007,7 @@ TEST(ObjectTest, isValidAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _P(5)}}, nullptr));
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _V(5)}}, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
@@ -1014,7 +1032,7 @@ TEST(ObjectTest, isValidActionNotDefinedForAction) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _P(5)}}, nullptr));
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _V(5)}}, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
@@ -1034,7 +1052,7 @@ TEST(ObjectTest, isValidActionNotDefinedForDestination) {
   auto srcObjectName = "srcObject";
   auto dstObjectName = "dstObject";
   auto actionName = "action";
-  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _P(5)}}, nullptr));
+  auto srcObject = std::shared_ptr<Object>(new Object(srcObjectName, 0, 0, {{"counter", _V(5)}}, nullptr));
   auto dstObject = std::shared_ptr<Object>(new Object(dstObjectName, 0, 0, {}, nullptr));
 
   auto mockActionPtr = setupAction(actionName, srcObject, dstObject);
