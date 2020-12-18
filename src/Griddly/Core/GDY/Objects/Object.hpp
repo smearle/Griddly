@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <random>
 
 #include "../Actions/Direction.hpp"
 #include "ObjectVariable.hpp"
@@ -31,11 +32,17 @@ struct InitialActionDefinition {
 };
 
 struct SingleInputMapping {
+  bool relative;
+  bool internal;
+  bool mappedToGrid;
+  
+  // if the action is relative to a source object
   glm::ivec2 vectorToDest{};
   glm::ivec2 orientationVector{};
   uint32_t actionId;
-  bool relative;
-  bool internal;
+
+  // If the action can be perform in any grid location
+  glm::ivec2 destinationLocation{};
 };
 
 struct BehaviourResult {
@@ -47,10 +54,9 @@ class Object : public std::enable_shared_from_this<Object> {
  public:
   virtual glm::ivec2 getLocation() const;
 
-  // playerId of 0 means the object does not belong to any player in particular, (walls etc)
-  virtual void init(uint32_t playerId, glm::ivec2 location, std::shared_ptr<Grid> grid_);
+  virtual void init(glm::ivec2 location, std::shared_ptr<Grid> grid);
 
-  virtual void init(uint32_t playerId, glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
+  virtual void init(glm::ivec2 location, DiscreteOrientation orientation, std::shared_ptr<Grid> grid);
 
   virtual std::string getObjectName() const;
 
@@ -92,7 +98,7 @@ class Object : public std::enable_shared_from_this<Object> {
   virtual std::vector<std::shared_ptr<Action>> getInitialActions();
   virtual void setInitialActionDefinitions(std::vector<InitialActionDefinition> actionDefinitions);
 
-  Object(std::string objectName, uint32_t id, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
+  Object(std::string objectName, uint32_t id, uint32_t playerId, uint32_t zIdx, std::unordered_map<std::string, std::shared_ptr<int32_t>> availableVariables, std::shared_ptr<ObjectGenerator> objectGenerator);
 
   ~Object();
 
@@ -103,7 +109,7 @@ class Object : public std::enable_shared_from_this<Object> {
 
   DiscreteOrientation orientation_ = DiscreteOrientation(Direction::NONE);
 
-  uint32_t playerId_;
+  std::shared_ptr<int32_t> playerId_ = std::make_shared<int32_t>(0);
   const std::string objectName_;
   const uint32_t id_;
   const uint32_t zIdx_;
