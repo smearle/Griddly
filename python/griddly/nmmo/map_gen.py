@@ -24,7 +24,7 @@ def replace_vars(yaml_contents, var_dict):
 
 class MapGen():
     MAP_WIDTH = 50
-    N_PLAYERS = 50
+    N_PLAYERS = 25
     INIT_DELAY = 10 # how long to wait before decrementing hunger & thirst
     INIT_HEALTH = 10
     INIT_THIRST = 10
@@ -80,7 +80,7 @@ class MapGen():
         #HACK: scale delays to num players
         replace_vars(contents, MapGen.VAR_DICT)
         with open(yaml_path, 'w') as f:
-            yaml.dump(contents, f)
+            yaml.safe_dump(contents, f, default_style=None, default_flow_style=False)
 
         return init_tiles, probs
 
@@ -103,5 +103,5 @@ class MapGen():
 
         level_string[:, -1] = '\n'
         level_string = ' '.join(s for s in level_string.reshape(-1))
-        return level_string
+        return level_string[:-2]
 

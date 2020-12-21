@@ -22,6 +22,8 @@ from griddly.util.rts_tools import InvalidMaskingRTSWrapper
 
 if __name__ == '__main__':
 
+
+
     # NB: The nmmo environment is designed to to render with an ISOMETRIC global observer only.
     wrapper = GymWrapperFactory()
 
