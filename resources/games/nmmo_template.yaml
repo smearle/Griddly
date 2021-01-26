@@ -1,6 +1,6 @@
 Version: "0.1"
 Environment:
-  Name: nmmo
+  Name: nmmo_template
   Description: An NMMO-type game. The idea is to set up an open-ended system wherein agents can progress from hunter\
    \ gathering, to agriculture, to basic civilization.
   Observers:
@@ -17,6 +17,10 @@ Environment:
       InitialValue: 0
     - Name: player_dead
       InitialValue: 0
+      PerPlayer: true
+    - Name: player_skill
+      InitialValue: 0
+      PerPlayer: true
   Player:
     Count: 1
     Observer:
@@ -30,7 +34,7 @@ Environment:
   Termination:
     Lose:
       #FIXME: This is broken, probably because gnomes are also player avatars.
-      - eq: [gnome:count, 0] # If all the gnomes are dead
+#     - eq: [gnome:count, 0] # If all the gnomes are dead
     Win:
 #     - eq: [_score, 10] # First player to 10 reward points
 
@@ -75,6 +79,9 @@ Actions:
             - lt:
                 Arguments: [health, 0]
                 Commands:
+                  - incr: player_dead
+                  - reward: -1
+                  - set_tile: 1
                  #- remove: true
             # keep ticking
             - exec:
@@ -106,6 +113,7 @@ Actions:
       - Src:
           Object: gnome
           Commands:
+            - incr: player_skill
             #FIXME: This does not work for some reason.
             # leaves give +5 hunger
       #     - incr: hunger
@@ -123,6 +131,7 @@ Actions:
             - incr: src.hunger
             - incr: src.hunger
             - decr: leaves
+            - reward: 1
            #- eq:
            #    Arguments: [leaves, 0]
            #    Commands:
@@ -148,10 +157,12 @@ Actions:
       - Src:
           Object: gnome
           Commands:
+            - set_tile: 1
             - reward: -1
-          # - remove: true
-          # - mov: _dest
-          # - set_tile: 1
+            - incr: player_dead
+            - decr: health
+           #- remove: true
+           #- mov: _dest
         Dst:
           Object: lava
           Commands:
@@ -223,3 +234,4 @@ Objects:
           Scale: 0.5
       Isometric:
         - Image: oryx/oryx_iso_dungeon/avatars/gnome-1.png
+        - Image: stratega/selected.png
