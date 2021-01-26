@@ -23,11 +23,16 @@ from griddly.util.rts_tools import InvalidMaskingRTSWrapper
 if __name__ == '__main__':
 
 
+    for env in copy.deepcopy(gym.envs.registry.env_specs):
+        if 'GDY' in env:
+            print("Remove {} from registry".format(env))
+            del gym.envs.registry.env_specs[env]
+
 
     # NB: The nmmo environment is designed to to render with an ISOMETRIC global observer only.
     wrapper = GymWrapperFactory()
 
-    yaml_path = 'resources/games/nmmo.yaml'
+    yaml_path = 'nmmo.yaml'
     map_gen = MapGen()
     init_tiles, probs = map_gen.get_init_tiles(yaml_path)
 

@@ -19,6 +19,7 @@ VulkanObserver::~VulkanObserver() {
 }
 
 void VulkanObserver::init(ObserverConfig observerConfig) {
+  gridBoundary_ = glm::ivec2(grid_->getWidth(), grid_->getHeight());
   observerConfig_ = observerConfig;
   auto imagePath = resourceConfig_.imagePath;
   auto shaderPath = resourceConfig_.shaderPath;
@@ -36,7 +37,7 @@ void VulkanObserver::init(ObserverConfig observerConfig) {
   resetShape();
 }
 
-std::shared_ptr<uint8_t> VulkanObserver::reset() {
+uint8_t* VulkanObserver::reset() {
   resetShape();
   resetRenderSurface();
 
@@ -52,7 +53,7 @@ std::shared_ptr<uint8_t> VulkanObserver::reset() {
   return device_->endRender(ctx, dirtyRectangles);
 }
 
-std::shared_ptr<uint8_t> VulkanObserver::update() const {
+uint8_t* VulkanObserver::update() const {
   auto ctx = device_->beginRender();
 
   render(ctx);
@@ -77,7 +78,7 @@ std::shared_ptr<uint8_t> VulkanObserver::update() const {
 
 void VulkanObserver::resetRenderSurface() {
   spdlog::debug("Initializing Render Surface. Grid width={0}, height={1}. Pixel width={2}. height={3}", gridWidth_, gridHeight_, pixelWidth_, pixelHeight_);
-  device_->resetRenderSurface(pixelWidth_, pixelHeight_);
+  observationStrides_ = device_->resetRenderSurface(pixelWidth_, pixelHeight_);
 }
 
 void VulkanObserver::release() {

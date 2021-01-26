@@ -2,12 +2,12 @@
 
 #include "Griddly/Core/TestUtils/common.hpp"
 #include "Griddly/Core/TurnBasedGameProcess.cpp"
-#include "Mocks/Griddly/Core/GDY/MockGDYFactory.cpp"
-#include "Mocks/Griddly/Core/GDY/MockTerminationHandler.cpp"
-#include "Mocks/Griddly/Core/LevelGenerators/MockLevelGenerator.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
-#include "Mocks/Griddly/Core/Observers/MockObserver.cpp"
-#include "Mocks/Griddly/Core/Players/MockPlayer.cpp"
+#include "Mocks/Griddly/Core/GDY/MockGDYFactory.hpp"
+#include "Mocks/Griddly/Core/GDY/MockTerminationHandler.hpp"
+#include "Mocks/Griddly/Core/LevelGenerators/MockLevelGenerator.hpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "Mocks/Griddly/Core/Observers/MockObserver.hpp"
+#include "Mocks/Griddly/Core/Players/MockPlayer.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -386,7 +386,7 @@ TEST(GameProcessTest, reset) {
   EXPECT_CALL(*mockObserverPtr, getObserverType())
       .WillRepeatedly(Return(ObserverType::VECTOR));
 
-  auto mockObservationPtr = std::shared_ptr<uint8_t>(new uint8_t[3]{0, 1, 2});
+  auto mockObservationPtr = new uint8_t[3]{0, 1, 2};
 
   EXPECT_CALL(*mockObserverPtr, reset())
       .WillOnce(Return(mockObservationPtr));
@@ -410,9 +410,9 @@ TEST(GameProcessTest, reset) {
 
   auto observation = gameProcessPtr->reset();
 
-  auto resetObservationPointer = std::vector<uint8_t>(observation.get(), observation.get() + 3);
+  auto resetObservationPointer = std::vector<uint8_t>(observation, observation + 3);
 
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(mockObservationPtr.get(), 3));
+  ASSERT_THAT(resetObservationPointer, ElementsAreArray(mockObservationPtr, 3));
 
   ASSERT_EQ(gameProcessPtr->getNumPlayers(), 1);
   ASSERT_TRUE(gameProcessPtr->isInitialized());

@@ -1,10 +1,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "Mocks/Griddly/Core/GDY/Actions/MockAction.cpp"
-#include "Mocks/Griddly/Core/MockGameProcess.cpp"
-#include "Mocks/Griddly/Core/Observers/MockObserver.cpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
+#include "Mocks/Griddly/Core/GDY/Actions/MockAction.hpp"
+#include "Mocks/Griddly/Core/MockGameProcess.hpp"
+#include "Mocks/Griddly/Core/Observers/MockObserver.hpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
 
 #include "Griddly/Core/Players/Player.hpp"
 
@@ -42,7 +42,7 @@ TEST(PlayerTest, performActions) {
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
+  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList), Eq(true)))
       .Times(1)
       .WillOnce(Return(ActionResult{{}, false, std::vector<int>{0, 1, 2, 3, 4}}));
 
@@ -72,7 +72,7 @@ TEST(PlayerTest, performActions_terminated) {
 
   auto actionsList = std::vector<std::shared_ptr<Action>>{mockActionPtr};
 
-  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList)))
+  EXPECT_CALL(*mockGameProcessPtr, performActions(Eq(playerId), Eq(actionsList), Eq(true)))
       .Times(1)
       .WillOnce(Return(ActionResult{{{1, TerminationState::WIN}}, true, std::vector<int>{0, 1, 2, 3, 4}}));
 
@@ -93,8 +93,7 @@ TEST(PlayerTest, performActions_terminated) {
 TEST(PlayerTest, observe) {
   auto mockGrid = std::shared_ptr<MockGrid>(new MockGrid());
   auto mockObserverPtr = std::shared_ptr<MockObserver>(new MockObserver(mockGrid));
-  auto mockObservationBytesPtr = std::shared_ptr<uint8_t>(new uint8_t[10 * 10]{}, std::default_delete<uint8_t[]>());
-  auto mockObservationBytes = mockObservationBytesPtr.get();
+  auto mockObservationBytesPtr = new uint8_t[10 * 10]{};
 
   int playerId = 0;
   std::string name = "PlayerName";
@@ -102,11 +101,11 @@ TEST(PlayerTest, observe) {
 
   EXPECT_CALL(*mockObserverPtr, update())
       .Times(1)
-      .WillOnce(Return(ByMove(std::move(mockObservationBytesPtr))));
+      .WillOnce(Return(mockObservationBytesPtr));
 
   auto observation = player->observe();
 
-  ASSERT_EQ(observation.get(), mockObservationBytes);
+  ASSERT_EQ(observation, mockObservationBytesPtr);
 
   EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockObserverPtr.get()));
 }

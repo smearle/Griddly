@@ -1,9 +1,13 @@
+#!/home/bam4d/anaconda3/envs/griddly/bin/python3
 from timeit import default_timer as timer
 import numpy as np
 import gym
 import os
 import psutil
+from gym import register
+
 process = psutil.Process(os.getpid())
+
 
 def griddly(gdy_file):
     from griddly import GymWrapperFactory, gd
@@ -13,34 +17,41 @@ def griddly(gdy_file):
                                 level=0)
     return gym.make(f'GDY-Griddly-v0')
 
+
 def micro_rts_test():
     import gym_microrts
-    return gym.make('BWDistantResources32x32-v0')
+    return gym.make('MicrortsMining-v4')
+
 
 def minigrid_test():
     import gym_minigrid
     return gym.make("MiniGrid-FourRooms-v0")
 
+
 def gvgai_test():
     import gvgai
     return gym.make("gvgai-sokoban-lvl0-v0")
+
 
 def gvgai_test_old():
     import gym_gvgai
     return gym_gvgai.make("gvgai-sokoban-lvl0-v0")
 
+
 if __name__ == '__main__':
 
-    #env = minigrid_test()
-    env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
+    #env = griddly('dmlab_pushbox.yaml')
 
-    #env = micro_rts_test()
-    #env = griddly('RTS/BWDistantResources32x32.yaml')
+    # env = minigrid_test()
+    # env = griddly('Single-Player/Mini-Grid/minigrid-eyeball.yaml')
+
+    # env = micro_rts_test()
+    # env = griddly('MicrortsMining.yaml')
 
     # memory usage recorded in these tests is inaccurate because the GVGAI environment is in a different process
-    #env = gvgai_test()
-    #env = gvgai_test_old()
-    #env = griddly('Single-Player/GVGAI/sokoban.yaml')
+    # env = gvgai_test()
+    # env = gvgai_test_old()
+    env = griddly('Single-Player/GVGAI/sokoban.yaml')
 
     env.reset()
     start = timer()
@@ -55,7 +66,8 @@ if __name__ == '__main__':
         frames += 1
         obs, reward, done, info = env.step(env.action_space.sample())
 
-        rendered_obs = env.render(mode='rgb_array')
+        # env.render()
+        # rendered_obs = env.render(mode='rgb_array')
 
         if frames % 1000 == 0:
             end = timer()
@@ -67,5 +79,5 @@ if __name__ == '__main__':
             print(f'mem: {mem}')
             frames = 0
             start = timer()
-    print(f'mean fps: {np.mean(fps_samples)}')
+    print(f'mean fps: {np.mean(fps_samples)}, std: {np.std(fps_samples)}')
     print(f'mean mem: {np.mean(mem_samples)}')

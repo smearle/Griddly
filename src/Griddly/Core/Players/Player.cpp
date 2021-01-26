@@ -64,8 +64,8 @@ std::shared_ptr<Observer> Player::getObserver() const {
   return observer_;
 }
 
-ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions) {
-  auto actionResult = gameProcess_->performActions(id_, actions);
+ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks) {
+  auto actionResult = gameProcess_->performActions(id_, actions, updateTicks);
 
   // Update the player's score
   for (auto r : actionResult.rewards) {
@@ -75,10 +75,10 @@ ActionResult Player::performActions(std::vector<std::shared_ptr<Action>> actions
   return actionResult;
 }
 
-std::shared_ptr<uint8_t> Player::observe() {
-  if (observer_ == nullptr) {
-    return nullptr;
-  }
+uint8_t* Player::observe() {
+  // if (observer_ == nullptr) {
+  //   return nullptr;
+  // }
   return observer_->update();
 }
 

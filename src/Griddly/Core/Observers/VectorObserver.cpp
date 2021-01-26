@@ -15,37 +15,44 @@ void VectorObserver::init(ObserverConfig observerConfig) {
 }
 
 ObserverType VectorObserver::getObserverType() const {
- return ObserverType::VECTOR; 
+  return ObserverType::VECTOR;
 }
 
 glm::ivec2 VectorObserver::getTileSize() const {
-  return glm::ivec2{1,1};
+  return glm::ivec2{1, 1};
 }
 
 void VectorObserver::resetShape() {
   gridWidth_ = observerConfig_.overrideGridWidth > 0 ? observerConfig_.overrideGridWidth : grid_->getWidth();
   gridHeight_ = observerConfig_.overrideGridHeight > 0 ? observerConfig_.overrideGridHeight : grid_->getHeight();
 
+  gridBoundary_.x = grid_->getWidth();
+  gridBoundary_.y = grid_->getHeight();
+
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
 
   observationShape_ = {uniqueObjectCount, gridWidth_, gridHeight_};
   observationStrides_ = {1, uniqueObjectCount, uniqueObjectCount * gridWidth_};
+
+  observation_ = std::shared_ptr<uint8_t>(new uint8_t[uniqueObjectCount * gridWidth_ * gridHeight_]{});
 }
 
-std::shared_ptr<uint8_t> VectorObserver::reset() {
+uint8_t* VectorObserver::reset() {
   resetShape();
   return update();
 };
 
-std::shared_ptr<uint8_t> VectorObserver::update() const {
+uint8_t* VectorObserver::update() const {
   auto uniqueObjectCount = grid_->getUniqueObjectCount();
-
-  std::shared_ptr<uint8_t> observation(new uint8_t[uniqueObjectCount * gridWidth_ * gridHeight_]{});
 
   if (avatarObject_ != nullptr) {
     auto avatarLocation = avatarObject_->getLocation();
     auto avatarOrientation = avatarObject_->getObjectOrientation();
     auto avatarDirection = avatarOrientation.getDirection();
+
+    // Have to reset the observation
+    auto size = sizeof(uint8_t) * uniqueObjectCount * gridWidth_ * gridHeight_;
+    memset(observation_.get(), 0, size);
 
     if (observerConfig_.rotateWithAvatar) {
       // Assuming here that gridWidth and gridHeight are odd numbers
@@ -61,7 +68,7 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
                 int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation.get()[idx] = 1;
+                observation_.get()[idx] = 1;
               }
               outy++;
             }
@@ -76,7 +83,7 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
                 int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation.get()[idx] = 1;
+                observation_.get()[idx] = 1;
               }
               outy--;
             }
@@ -91,7 +98,7 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
                 int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation.get()[idx] = 1;
+                observation_.get()[idx] = 1;
               }
               outx++;
             }
@@ -105,7 +112,7 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
               for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
                 auto object = objectIt.second;
                 int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-                observation.get()[idx] = 1;
+                observation_.get()[idx] = 1;
               }
               outx--;
             }
@@ -121,11 +128,13 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
       for (auto objx = pGrid.left; objx <= pGrid.right; objx++) {
         outy = 0;
         for (auto objy = pGrid.bottom; objy <= pGrid.top; objy++) {
-          // place a 1 in every object "slice" where that object appears
-          for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-            auto object = objectIt.second;
-            int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-            observation.get()[idx] = 1;
+          if (objx < gridBoundary_.x && objx >= 0 && objy < gridBoundary_.y && objy >= 0) {
+            // place a 1 in every object "slice" where that object appears
+            for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
+              auto object = objectIt.second;
+              int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
+              observation_.get()[idx] = 1;
+            }
           }
           outy++;
         }
@@ -133,28 +142,37 @@ std::shared_ptr<uint8_t> VectorObserver::update() const {
       }
     }
   } else {
-    // Can optimize these by only updating states that change and keeping a buffer of the entire state
-    auto left = observerConfig_.gridXOffset;
-    auto right = observerConfig_.gridXOffset + gridWidth_ - 1;
-    auto bottom = observerConfig_.gridYOffset;
-    auto top = observerConfig_.gridYOffset + gridHeight_ - 1;
-    uint32_t outx = 0, outy = 0;
-    for (auto objx = left; objx <= right; objx++) {
-      outy = 0;
-      for (auto objy = bottom; objy <= top; objy++) {
-        for (auto objectIt : grid_->getObjectsAt({objx, objy})) {
-          auto object = objectIt.second;
+    const auto& updatedLocations = grid_->getUpdatedLocations(observerConfig_.playerId);
 
-          int idx = uniqueObjectCount * (gridWidth_ * outy + outx) + object->getObjectId();
-          observation.get()[idx] = 1;
+    for (auto& location : updatedLocations) {
+      if (location.x >= observerConfig_.gridXOffset &&
+          location.x < gridWidth_ + observerConfig_.gridXOffset &&
+          location.y >= observerConfig_.gridYOffset &&
+          location.y < gridHeight_ + observerConfig_.gridYOffset) {
+        auto outputLocation = glm::ivec2(
+            location.x - observerConfig_.gridXOffset,
+            location.y - observerConfig_.gridYOffset);
+
+        if (outputLocation.x < gridWidth_ && outputLocation.x >= 0 && outputLocation.y < gridHeight_ && outputLocation.y >= 0) {
+          auto memPtr = observation_.get() + uniqueObjectCount * (gridWidth_ * outputLocation.y + outputLocation.x);
+
+          auto size = sizeof(uint8_t) * uniqueObjectCount;
+          memset(memPtr, 0, size);
+
+          auto& objects = grid_->getObjectsAt(location);
+          for (auto objectIt : objects) {
+            auto object = objectIt.second;
+            auto memPtrObject = memPtr + object->getObjectId();
+            *memPtrObject = 1;
+          }
         }
-        outy++;
       }
-      outx++;
     }
   }
 
-  return observation;
+  grid_->purgeUpdatedLocations(observerConfig_.playerId);
+
+  return observation_.get();
 }
 
 void VectorObserver::print(std::shared_ptr<uint8_t> observation) {

@@ -37,7 +37,7 @@ void BlockObserver::init(ObserverConfig observerConfig) {
 }
 
 void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 objectLocation, glm::ivec2 outputLocation, glm::ivec2 tileOffset, DiscreteOrientation orientation) const {
-  auto objects = grid_->getObjectsAt(objectLocation);
+  auto& objects = grid_->getObjectsAt(objectLocation);
   auto tileSize = observerConfig_.tileSize;
 
   for (auto objectIt : objects) {
@@ -71,7 +71,7 @@ void BlockObserver::renderLocation(vk::VulkanRenderContext& ctx, glm::ivec2 obje
       glm::vec4 outlineColor;
 
       if (playerId == objectPlayerId) {
-        outlineColor = glm::vec4(0.0, 1.0, 0.0, 0.7);
+        outlineColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
       } else {
         outlineColor = globalObserverPlayerColors_[objectPlayerId-1];
       }

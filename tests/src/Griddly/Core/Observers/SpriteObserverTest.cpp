@@ -1,6 +1,7 @@
 #include "Griddly/Core/Observers/SpriteObserver.hpp"
-#include "Griddly/Core/TestUtils/common.hpp"
-#include "Mocks/Griddly/Core/MockGrid.cpp"
+#include "Mocks/Griddly/Core/MockGrid.hpp"
+#include "ObserverRTSTestData.hpp"
+#include "ObserverTestData.hpp"
 #include "VulkanObserverTest.hpp"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -9,142 +10,13 @@ using ::testing::AnyNumber;
 using ::testing::ElementsAre;
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
+using ::testing::Invoke;
 using ::testing::Mock;
 using ::testing::Pair;
 using ::testing::Return;
 using ::testing::ReturnRef;
 
 namespace griddly {
-
-std::unordered_set<std::shared_ptr<Object>> sprites_mockRTSGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr) {
-  // make a grid where multiple objects are owned by different players
-  // 1  1   1   1   1
-  // 1  A1  B2  C3  1
-  // 1  A2  B3  C1  1
-  // 1  A3  B1  C2  1
-  // 1  1   1   1   1
-
-  auto mockObjectWallPtr = mockObject("W", 0, 3);
-
-  auto mockObjectA1Ptr = mockObject("A", 1, 0);
-  auto mockObjectA2Ptr = mockObject("A", 2, 0);
-  auto mockObjectA3Ptr = mockObject("A", 3, 0);
-
-  auto mockObjectB1Ptr = mockObject("B", 1, 1);
-  auto mockObjectB2Ptr = mockObject("B", 2, 1);
-  auto mockObjectB3Ptr = mockObject("B", 3, 1);
-
-  auto mockObjectC1Ptr = mockObject("C", 1, 2);
-  auto mockObjectC2Ptr = mockObject("C", 2, 2);
-  auto mockObjectC3Ptr = mockObject("C", 3, 2);
-
-  auto objects = std::unordered_set<std::shared_ptr<Object>>{
-      mockObjectWallPtr,
-      mockObjectA1Ptr,
-      mockObjectA2Ptr,
-      mockObjectA3Ptr,
-      mockObjectB1Ptr,
-      mockObjectB2Ptr,
-      mockObjectB3Ptr,
-      mockObjectC1Ptr,
-      mockObjectC2Ptr,
-      mockObjectC3Ptr};
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0})))
-      .WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectA3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectB3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectC3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObjectWallPtr}}));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(mockObjectWallPtr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(mockObjectA1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(mockObjectB1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(mockObjectC1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(mockObjectWallPtr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(mockObjectA2Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(mockObjectB2Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(mockObjectC2Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(mockObjectWallPtr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(mockObjectA3Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(mockObjectB3Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(mockObjectC3Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(mockObjectWallPtr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(mockObjectWallPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(mockObjectWallPtr));
-
-  EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
-
-  std::unordered_set<glm::ivec2> updatedLocations = {
-      {0, 0},
-      {0, 1},
-      {0, 2},
-      {0, 3},
-      {0, 4},
-      {1, 0},
-      {1, 1},
-      {1, 2},
-      {1, 3},
-      {1, 4},
-      {2, 0},
-      {2, 1},
-      {2, 2},
-      {2, 3},
-      {2, 4},
-      {3, 0},
-      {3, 1},
-      {3, 2},
-      {3, 3},
-      {3, 4},
-      {4, 0},
-      {4, 1},
-      {4, 2},
-      {4, 3},
-      {4, 4},
-  };
-
-  ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
-
-  return objects;
-}
 
 std::unordered_map<std::string, SpriteDefinition> getMockRTSSpriteDefinitions() {
   // mock wall object
@@ -215,17 +87,10 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
   observerConfig.tileSize = glm::ivec2(50, 50);
 
   auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
 
-  auto objects = sprites_mockRTSGridFunctions(mockGridPtr);
+  ObserverRTSTestData testEnvironment = ObserverRTSTestData(observerConfig);
 
-  EXPECT_CALL(*mockGridPtr, getObjects)
-      .WillRepeatedly(ReturnRef(objects));
-
-  EXPECT_CALL(*mockGridPtr, getWidth)
-      .WillRepeatedly(Return(5));
-  EXPECT_CALL(*mockGridPtr, getHeight)
-      .WillRepeatedly(Return(5));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockRTSSpriteDefinitions()));
 
   spriteObserver->init(observerConfig);
 
@@ -233,146 +98,24 @@ void runSpriteObserverRTSTest(ObserverConfig observerConfig,
 
   ASSERT_EQ(spriteObserver->getTileSize(), glm::ivec2(50, 50));
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
+  ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
 
   auto updateObservation = spriteObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", resetObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
-  size_t dataLength = spriteObserver->getShape()[0] * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
+  size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
   auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), resetObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
 
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
-}
-
-std::unordered_set<std::shared_ptr<Object>> sprites_mockGridFunctions(std::shared_ptr<MockGrid>& mockGridPtr, std::shared_ptr<MockObject>& mockAvatarObjectPtr) {
-  // make a 5 by 5 grid with an avatar in the center and some stuff around it, there are 4 types of object
-  // "4" is the avatar type
-  // 11111
-  // 12031
-  // 12431
-  // 13021
-  // 11111
-
-  auto mockObject1Ptr = mockObject("mo1", 1, 0);
-  auto mockObject2Ptr = mockObject("mo2", 1, 1);
-  auto mockObject3Ptr = mockObject("mo3", 1, 2);
-
-  auto objects = std::unordered_set<std::shared_ptr<Object>>{mockObject1Ptr, mockObject2Ptr, mockObject3Ptr};
-
-  EXPECT_CALL(*mockAvatarObjectPtr, getObjectId())
-      .WillRepeatedly(Return(3));
-  EXPECT_CALL(*mockAvatarObjectPtr, getLocation()).WillRepeatedly(Return(glm::ivec2{2, 2}));
-  EXPECT_CALL(*mockAvatarObjectPtr, getObjectName()).WillRepeatedly(Return("avatar"));
-  EXPECT_CALL(*mockAvatarObjectPtr, getObjectRenderTileName()).WillRepeatedly(Return("avatar" + std::to_string(0)));
-
-  EXPECT_CALL(*mockGridPtr, getUniqueObjectCount).WillRepeatedly(Return(4));
-
-  // A horrible way of making a mock grid but fuck it
-  ON_CALL(*mockGridPtr, getObjectsAt).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockAvatarObjectPtr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject3Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject2Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-  ON_CALL(*mockGridPtr, getObjectsAt(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(std::map<uint32_t, std::shared_ptr<Object>>{{0, mockObject1Ptr}}));
-
-  // So the tiling for sprites is calculated correctly for walls
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 0}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 0}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 0}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 0}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 0}))).WillByDefault(Return(mockObject1Ptr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 1}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 1}))).WillByDefault(Return(mockObject2Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 1}))).WillByDefault(Return(nullptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 1}))).WillByDefault(Return(mockObject3Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 1}))).WillByDefault(Return(mockObject1Ptr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 2}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 2}))).WillByDefault(Return(mockObject2Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 2}))).WillByDefault(Return(mockAvatarObjectPtr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 2}))).WillByDefault(Return(mockObject3Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 2}))).WillByDefault(Return(mockObject1Ptr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 3}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 3}))).WillByDefault(Return(mockObject3Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 3}))).WillByDefault(Return(nullptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 3}))).WillByDefault(Return(mockObject2Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 3}))).WillByDefault(Return(mockObject1Ptr));
-
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{0, 4}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{1, 4}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{2, 4}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{3, 4}))).WillByDefault(Return(mockObject1Ptr));
-  ON_CALL(*mockGridPtr, getObject(Eq(glm::ivec2{4, 4}))).WillByDefault(Return(mockObject1Ptr));
-
-  std::unordered_set<glm::ivec2> updatedLocations = {
-      {0, 0},
-      {0, 1},
-      {0, 2},
-      {0, 3},
-      {0, 4},
-      {1, 0},
-      {1, 1},
-      {1, 2},
-      {1, 3},
-      {1, 4},
-      {2, 0},
-      {2, 1},
-      {2, 2},
-      {2, 3},
-      {2, 4},
-      {3, 0},
-      {3, 1},
-      {3, 2},
-      {3, 3},
-      {3, 4},
-      {4, 0},
-      {4, 1},
-      {4, 2},
-      {4, 3},
-      {4, 4},
-  };
-
-  ON_CALL(*mockGridPtr, getUpdatedLocations).WillByDefault(Return(updatedLocations));
-
-  return objects;
+  testEnvironment.verifyAndClearExpectations();
 }
 
 std::unordered_map<std::string, SpriteDefinition> getMockSpriteDefinitions() {
@@ -439,57 +182,42 @@ void runSpriteObserverTest(ObserverConfig observerConfig,
                            Direction avatarDirection,
                            std::vector<uint32_t> expectedObservationShape,
                            std::vector<uint32_t> expectedObservationStride,
-                           std::string filenameExpectedOutputFilename,
+                           std::string expectedOutputFilename,
                            bool trackAvatar,
                            bool writeOutputFile = false) {
   ResourceConfig resourceConfig = {"resources/images", "resources/shaders"};
   observerConfig.tileSize = glm::ivec2(24, 24);
 
-  auto mockGridPtr = std::shared_ptr<MockGrid>(new MockGrid());
-  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
+  ObserverTestData testEnvironment = ObserverTestData(observerConfig, DiscreteOrientation(avatarDirection), trackAvatar);
 
-  auto mockAvatarObjectPtr = std::shared_ptr<MockObject>(new MockObject());
-  auto orientation = DiscreteOrientation(avatarDirection);
-  EXPECT_CALL(*mockAvatarObjectPtr, getObjectOrientation).WillRepeatedly(Return(orientation));
-
-  auto objects = sprites_mockGridFunctions(mockGridPtr, mockAvatarObjectPtr);
-
-  EXPECT_CALL(*mockGridPtr, getObjects())
-      .WillRepeatedly(ReturnRef(objects));
-      
-  EXPECT_CALL(*mockGridPtr, getWidth)
-      .WillRepeatedly(Return(5));
-  EXPECT_CALL(*mockGridPtr, getHeight)
-      .WillRepeatedly(Return(5));
+  std::shared_ptr<SpriteObserver> spriteObserver = std::shared_ptr<SpriteObserver>(new SpriteObserver(testEnvironment.mockGridPtr, resourceConfig, getMockSpriteDefinitions()));
 
   spriteObserver->init(observerConfig);
 
   if (trackAvatar) {
-    spriteObserver->setAvatar(mockAvatarObjectPtr);
+    spriteObserver->setAvatar(testEnvironment.mockAvatarObjectPtr);
   }
 
   auto resetObservation = spriteObserver->reset();
   ASSERT_EQ(spriteObserver->getShape(), expectedObservationShape);
-  ASSERT_EQ(spriteObserver->getStrides(), expectedObservationStride);
+  ASSERT_EQ(spriteObserver->getStrides()[0], expectedObservationStride[0]);
+  ASSERT_EQ(spriteObserver->getStrides()[1], expectedObservationStride[1]);
+
   auto updateObservation = spriteObserver->update();
 
   if (writeOutputFile) {
     std::string testName(::testing::UnitTest::GetInstance()->current_test_info()->name());
-    write_image(testName + ".png", resetObservation.get(), spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
+    write_image(testName + ".png", resetObservation, spriteObserver->getStrides()[2], spriteObserver->getShape()[1], spriteObserver->getShape()[2]);
   }
 
-  size_t dataLength = spriteObserver->getShape()[0] * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
+  size_t dataLength = 4 * spriteObserver->getShape()[1] * spriteObserver->getShape()[2];
 
-  auto expectedImageData = loadExpectedImage(filenameExpectedOutputFilename);
+  auto expectedImageData = loadExpectedImage(expectedOutputFilename);
 
-  auto resetObservationPointer = std::vector<uint8_t>(resetObservation.get(), resetObservation.get() + dataLength);
-  auto updateObservationPointer = std::vector<uint8_t>(updateObservation.get(), updateObservation.get() + dataLength);
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), resetObservation));
+  ASSERT_THAT(expectedImageData.get(), ObservationResultMatcher(spriteObserver->getShape(), spriteObserver->getStrides(), updateObservation));
 
-  ASSERT_THAT(resetObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-  ASSERT_THAT(updateObservationPointer, ElementsAreArray(expectedImageData.get(), dataLength));
-
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockAvatarObjectPtr.get()));
-  EXPECT_TRUE(Mock::VerifyAndClearExpectations(mockGridPtr.get()));
+  testEnvironment.verifyAndClearExpectations();
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig) {
@@ -500,7 +228,7 @@ TEST(SpriteObserverTest, defaultObserverConfig) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", false);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar) {
@@ -510,7 +238,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar) {
       0,
       0,
       false};
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE) {
@@ -521,7 +249,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) {
@@ -532,7 +260,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_UP) 
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT) {
@@ -543,7 +271,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGH
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN) {
@@ -554,7 +282,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT) {
@@ -565,7 +293,7 @@ TEST(SpriteObserverTest, defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT
       0,
       true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 120}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/defaultObserverConfig_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver) {
@@ -576,7 +304,7 @@ TEST(SpriteObserverTest, partialObserver) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver.png", false);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset) {
@@ -587,7 +315,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset.png", false);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset.png", false);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_NONE) {
@@ -598,7 +326,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_NONE) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_UP) {
@@ -609,7 +337,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_UP) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_RIGHT) {
@@ -620,7 +348,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_RIGHT) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_DOWN) {
@@ -631,7 +359,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_DOWN) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_trackAvatar_LEFT) {
@@ -642,7 +370,7 @@ TEST(SpriteObserverTest, partialObserver_trackAvatar_LEFT) {
       0,
       false};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_trackAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
@@ -653,7 +381,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_NONE) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_UP) {
@@ -664,7 +392,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_UP) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
@@ -675,7 +403,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_RIGHT) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
@@ -686,7 +414,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_DOWN) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
@@ -697,7 +425,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_LEFT) {
       1,
       false};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE) {
@@ -708,7 +436,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
+  runSpriteObserverTest(config, Direction::NONE, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_NONE.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP) {
@@ -719,7 +447,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
+  runSpriteObserverTest(config, Direction::UP, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_UP.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT) {
@@ -730,7 +458,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
+  runSpriteObserverTest(config, Direction::RIGHT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_RIGHT.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN) {
@@ -741,7 +469,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
+  runSpriteObserverTest(config, Direction::DOWN, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_DOWN.png", true);
 }
 
 TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT) {
@@ -752,7 +480,7 @@ TEST(SpriteObserverTest, partialObserver_withOffset_trackAvatar_rotateWithAvatar
       1,
       true};
 
-  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 3, 3 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
+  runSpriteObserverTest(config, Direction::LEFT, {3, 120, 72}, {1, 4, 4 * 120}, "tests/resources/observer/sprite/partialObserver_withOffset_trackAvatar_rotateWithAvatar_LEFT.png", true);
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
@@ -760,7 +488,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player1) {
   config.playerId = 1;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player1.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player1.png");
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
@@ -768,7 +496,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player2) {
   config.playerId = 2;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player2.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player2.png");
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
@@ -776,7 +504,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Player3) {
   config.playerId = 3;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player3.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Player3.png");
 }
 
 TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
@@ -784,7 +512,7 @@ TEST(SpriteObserverTest, multiPlayer_Outline_Global) {
   config.playerId = 0;
   config.playerCount = 3;
 
-  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 3, 3 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Global.png");
+  runSpriteObserverRTSTest(config, {3, 250, 250}, {1, 4, 4 * 250}, "tests/resources/observer/sprite/multiPlayer_Outline_Global.png");
 }
 
 }  // namespace griddly

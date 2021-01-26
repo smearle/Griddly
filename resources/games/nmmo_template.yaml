@@ -30,7 +30,7 @@ Environment:
   Termination:
     Lose:
       #FIXME: This is broken, probably because gnomes are also player avatars.
-#     - eq: [gnome:count, 0] # If all the gnomes are dead
+      - eq: [gnome:count, 0] # If all the gnomes are dead
     Win:
 #     - eq: [_score, 10] # First player to 10 reward points
 
@@ -75,7 +75,7 @@ Actions:
             - lt:
                 Arguments: [health, 0]
                 Commands:
-                  - remove: true
+                 #- remove: true
             # keep ticking
             - exec:
                 Action: tick_state
@@ -149,9 +149,9 @@ Actions:
           Object: gnome
           Commands:
             - reward: -1
-            - remove: true
-            - mov: _dest
-            - set_tile: 1
+          # - remove: true
+          # - mov: _dest
+          # - set_tile: 1
         Dst:
           Object: lava
           Commands:

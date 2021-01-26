@@ -40,8 +40,8 @@ class Observer {
    * The data is returned as a byte array for consistency across observers and
    * interfaces
    */
-  virtual std::shared_ptr<uint8_t> update() const = 0;
-  virtual std::shared_ptr<uint8_t> reset() = 0;
+  virtual uint8_t* update() const = 0;
+  virtual uint8_t* reset() = 0;
   
   virtual std::vector<uint32_t> getShape() const;
   virtual std::vector<uint32_t> getStrides() const;
@@ -66,6 +66,9 @@ class Observer {
   uint32_t gridHeight_;
 
   virtual void resetShape() = 0;
+
+  // Boundary of the game grid regardless of render shape
+  glm::ivec2 gridBoundary_;
 
   const std::shared_ptr<Grid> grid_;
   std::shared_ptr<Object> avatarObject_;

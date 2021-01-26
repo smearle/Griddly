@@ -27,12 +27,12 @@ class Player {
  public:
   Player(uint32_t id, std::string playerName, std::shared_ptr<Observer> observer);
 
-  virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions);
+  virtual ActionResult performActions(std::vector<std::shared_ptr<Action>> actions, bool updateTicks=true);
 
   virtual void init(ObserverConfig observerConfig, bool trackAvatar, std::shared_ptr<GameProcess> gameProcess);
   virtual void reset();
 
-  virtual std::shared_ptr<uint8_t> observe();
+  virtual uint8_t* observe();
 
   virtual std::string getName() const;
   virtual uint32_t getId() const;
