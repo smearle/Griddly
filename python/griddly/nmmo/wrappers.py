@@ -51,9 +51,11 @@ class ValidatedMultiDiscreteNMMO(gym.spaces.MultiDiscrete):
 
 
 class NMMOWrapper(gym.Wrapper):
-    def __init__(self, env):
+    def __init__(self, env, max_steps=100):
         super().__init__(env)
         self.deads = set()
+        self.n_step = 0
+        self.max_steps = max_steps
 
     def step(self, action):
         rew = {}
@@ -82,7 +84,9 @@ class NMMOWrapper(gym.Wrapper):
     #       # This will remain true if all agents are done
     #       all_done = all_done and p_done
 
-        done['__all__'] = len(self.deads) == self.player_count
+       #done['__all__'] = len(self.deads) == self.player_count
+        done['__all__'] = self.n_step >= self.max_steps
+        self.n_step += 1
 
         return obs, rew, done, info
 
@@ -116,6 +120,8 @@ class NMMOWrapper(gym.Wrapper):
         self.observation_space = self.env.observation_space
 
         obs = dict([(i, val) for i, val in enumerate(reset_result)])
+
+        self.n_step = 0
 
         return obs
 
